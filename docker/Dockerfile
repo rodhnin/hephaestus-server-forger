@@ -54,7 +54,6 @@ WORKDIR /app
 COPY heph/ /app/heph/
 COPY config/ /app/config/
 COPY templates/ /app/templates/
-COPY schema/ /app/schema/
 COPY db/ /app/db/
 COPY assets/ /app/assets/
 
