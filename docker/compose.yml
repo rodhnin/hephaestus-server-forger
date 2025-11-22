@@ -1,0 +1,125 @@
+# ============================================================================
+# Hephaestus Production - Docker Compose
+# ============================================================================
+# Main Hephaestus server security scanner service
+#
+# Usage:
+#   docker compose up -d              # Start scanner service
+#   docker compose exec hephaestus python -m heph --target https://example.com
+#   docker compose logs -f            # View logs
+#   docker compose down               # Stop service
+#
+# Build:
+#   docker compose build              # Build image
+#   docker compose build --no-cache   # Rebuild from scratch
+# ============================================================================
+
+services:
+  hephaestus:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: hephaestus:0.1.0
+    container_name: hephaestus-scanner
+    restart: unless-stopped
+    user: "1000:1000"  # Run as non-root user
+
+    # Mount directories for reports and database
+    volumes:
+      - ./data:/data                      # Shared database
+      - ./reports:/reports                # Scan reports
+      - ./config:/app/config:ro           # Custom config (optional)
+
+    # Environment variables
+    environment:
+      - HEPHAESTUS_REPORT_DIR=/reports
+      - HEPHAESTUS_DATABASE=/data/argos.db
+      - HEPHAESTUS_DOCKER_IN_CONTAINER=true
+      # Uncomment to enable AI features
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+
+    # Network configuration
+    networks:
+      - hephaestus-prod
+      - hephaestus-lab  # Join testing lab network to scan vulnerable servers
+
+    # Keep container running (override ENTRYPOINT and CMD)
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["tail -f /dev/null"]
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-m", "heph", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+    labels:
+      - "com.hephaestus.service=scanner"
+      - "com.hephaestus.environment=production"
+      - "com.hephaestus.version=0.1.0"
+
+networks:
+  hephaestus-prod:
+    driver: bridge
+    name: hephaestus-prod
+    labels:
+      - "com.hephaestus.network=production"
+
+  hephaestus-lab:
+    driver: bridge
+    name: hephaestus-lab
+    external: true  # Created by compose.testing.yml
+
+# ============================================================================
+# Usage Examples:
+# ============================================================================
+#
+# 1. Start scanner (long-running service):
+#    docker compose up -d
+#
+# 2. Run a scan:
+#    docker compose exec hephaestus python -m heph --target https://example.com
+#
+# 3. Run scan with HTML report:
+#    docker compose exec hephaestus python -m heph --target https://example.com --html
+#
+# 4. Run scan with AI analysis (requires OPENAI_API_KEY):
+#    docker compose exec hephaestus python -m heph --target https://example.com --use-ai --html
+#
+# 5. Scan vulnerable testing lab (from same Docker network):
+#    docker compose exec hephaestus python -m heph --target http://hephaestus-vulnerable-apache
+#    docker compose exec hephaestus python -m heph --target http://hephaestus-vulnerable-nginx
+#
+# 6. Generate consent token:
+#    docker compose exec hephaestus python -m heph --gen-consent example.com
+#
+# 7. View reports:
+#    ls -lh ./reports/
+#
+# 8. Check database:
+#    docker compose exec hephaestus sqlite3 /data/argos.db "SELECT * FROM scans LIMIT 5;"
+#
+# 9. View logs:
+#    docker compose logs -f hephaestus
+#
+# 10. Stop service:
+#     docker compose down
+#
+# 11. Remove all data (WARNING: deletes reports and database):
+#     docker compose down -v
+#     rm -rf ./data ./reports
+#
+# ============================================================================
+# Directory Structure (auto-created):
+# ============================================================================
+# docker/
+#   ├── data/              # Database storage (./data:/data)
+#   │   └── argos.db       # Shared Argos database
+#   ├── reports/           # Scan reports (./reports:/reports)
+#   │   ├── *.json         # JSON reports
+#   │   └── *.html         # HTML reports (if --html used)
+#   └── config/            # Optional custom config
+#       └── config.yaml    # Override defaults
+# ============================================================================

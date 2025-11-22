@@ -1,0 +1,291 @@
+# Hephaestus .gitignore
+
+# ============================================================================
+# PYTHON
+# ============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# ============================================================================
+# HEPHAESTUS SPECIFIC
+# ============================================================================
+# User data directories (reports, logs, proofs)
+.hephaestus/
+!.hephaestus/.gitkeep
+
+# Shared Argos database (should be in ~/.argos/)
+argos.db
+argos.db-journal
+
+# Reports (unless examples)
+reports/
+*.json
+*.html
+!examples/*.json
+!examples/*.html
+
+# Logs
+*.log
+hephaestus.log
+
+# Consent proofs (sensitive)
+consent-proofs/
+*.proof
+
+# Cache
+*.cache
+http_cache/
+
+# Temp files
+*.tmp
+*.temp
+~*
+
+# ============================================================================
+# DOCKER
+# ============================================================================
+# Docker build context
+.dockerignore
+
+# Docker volumes
+docker/volumes/
+docker/data/
+
+# ============================================================================
+# IDE / EDITORS
+# ============================================================================
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ============================================================================
+# OS SPECIFIC
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# SECURITY (CRITICAL - NEVER COMMIT THESE)
+# ============================================================================
+# API keys and secrets
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+secrets.yaml
+secrets.json
+
+# Consent tokens (sensitive)
+verify-*.txt
+
+# Private configs
+config/private.yaml
+config/local.yaml
+
+# Test credentials
+test_credentials.txt
+test_api_keys.txt
+
+# ============================================================================
+# MISC
+# ============================================================================
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+
+# Compressed files
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# Patch files
+*.patch
+*.diff

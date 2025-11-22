@@ -1,0 +1,437 @@
+# Hephaestus - Improved Configuration v0.1.0
+# Based on validation lab findings - Improved detection rates
+# Changes: Added missing patterns found in lab testing
+
+# ============================================================================
+# GENERAL SETTINGS
+# ============================================================================
+general:
+  version: "0.1.0"
+  author: "Rodney Dhavid Jimenez Chacin (rodhnin)"
+  github: "https://github.com/rodhnin/hephaestus-server-forger"
+  contact: "https://rodhnin.com"
+
+# ============================================================================
+# PATHS & STORAGE
+# ============================================================================
+paths:
+  report_dir: "~/.hephaestus/reports"
+  database: "~/.argos/argos.db"
+  log_file: "~/.hephaestus/hephaestus.log"
+  consent_proofs_dir: "~/.hephaestus/consent-proofs"
+
+# ============================================================================
+# SCAN BEHAVIOR
+# ============================================================================
+scan:
+  default_mode: "safe"
+  
+  rate_limit:
+    safe_mode: 5.0
+    aggressive_mode: 12.0
+  
+  timeout:
+    connect: 15
+    read: 45
+  
+  user_agent: "Hephaestus/0.1.0"
+  
+  follow_redirects: true
+  max_redirects: 3
+  
+  verify_ssl: true
+
+# ============================================================================
+# SERVER-SPECIFIC SETTINGS
+# ============================================================================
+server:
+  # Common sensitive files to check
+  common_paths:
+    # ═══════════════════════════════════════════════════════════════
+    # Environment files
+    # ═══════════════════════════════════════════════════════════════
+    - "/.env"
+    - "/.env.local"
+    - "/.env.production"
+    - "/.env.backup"
+    - "/.env.old"
+    - "/.env.save"
+    - "/.env.example"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Git repository exposure
+    # ═══════════════════════════════════════════════════════════════
+    - "/.git/HEAD"
+    - "/.git/config"
+    - "/.git/index"
+    - "/.gitignore"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # PHP info leaks
+    # ═══════════════════════════════════════════════════════════════
+    - "/phpinfo.php"
+    - "/info.php"
+    - "/test.php"
+    - "/php.php"
+    - "/diagnostic.php"
+    - "/system-check.php"
+    - "/debug.php"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Apache/Nginx status pages
+    # ═══════════════════════════════════════════════════════════════
+    - "/server-status"
+    - "/server-info"
+    - "/status"
+    - "/admin/diagnostics"
+    - "/admin/status"
+    - "/nginx_status"
+    - "/nginx-status"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Configuration files
+    # ═══════════════════════════════════════════════════════════════
+    - "/.htaccess"
+    - "/.htpasswd"
+    - "/web.config"
+    - "/nginx.conf"
+    - "/apache2.conf"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Framework config files + BACKUP VARIANTS
+    # ═══════════════════════════════════════════════════════════════
+    - "/config.php"
+    - "/config.php.old"
+    - "/config.php.save"
+    - "/config.php.bak"
+    - "/configuration.php"
+    - "/settings.php"
+    - "/settings.php.old"
+    - "/settings.php.save"
+    - "/settings.php.bak"
+    - "/database.yml"
+    - "/database.php"
+    - "/app.config.json"
+    - "/app.config.json.bak"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Package managers
+    # ═══════════════════════════════════════════════════════════════
+    - "/composer.json"
+    - "/composer.lock"
+    - "/package.json"
+    - "/package-lock.json"
+    - "/yarn.lock"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Backup files
+    # ═══════════════════════════════════════════════════════════════
+    - "/backup.zip"
+    - "/backup.tar.gz"
+    - "/backup.sql"
+    - "/dump.sql"
+    - "/database.sql"
+    - "/db.sql"
+    - "/site.zip"
+    - "/www.zip"
+    
+    # SQL backups with common date patterns
+    - "/db_backup_2024_10_23.sql"
+    - "/backup_database.sql"
+    - "/postgres_dump_20241023.sql"
+    - "/mysql_dump.sql"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Log files
+    # ═══════════════════════════════════════════════════════════════
+    - "/error.log"
+    - "/access.log"
+    - "/access.log.old"
+    - "/debug.log"
+    - "/app.log"
+    - "/laravel.log"
+    - "/application.log"
+    
+    # ═══════════════════════════════════════════════════════════════
+    # Backup extensions (generic patterns)
+    # ═══════════════════════════════════════════════════════════════
+    - "/*.bak"
+    - "/*.old"
+    - "/*.orig"
+    - "/*.save"
+    - "/*.swp"
+    - "/*~"
+  
+  # ═══════════════════════════════════════════════════════════════
+  # HTTP methods to test
+  # ═══════════════════════════════════════════════════════════════
+  http_methods:
+    check_options: true
+    probe_unsafe: true
+    methods_to_test:
+      - "OPTIONS"
+      - "PUT"
+      - "DELETE"
+      - "TRACE"
+      - "CONNECT"
+      - "PATCH"
+  
+  # ═══════════════════════════════════════════════════════════════
+  # Directory listing checks
+  # ═══════════════════════════════════════════════════════════════
+  directory_listing:
+    paths_to_check:
+      - "/uploads/"
+      - "/images/"
+      - "/files/"
+      - "/public/"
+      - "/assets/"
+      - "/static/"
+      - "/media/"
+      - "/download/"
+      - "/tmp/"
+      - "/temp/"
+      - "/backups/"
+      - "/backup/"
+      - "/logs/"
+      - "/log/"
+    max_paths_to_check: 15
+  
+  # ═══════════════════════════════════════════════════════════════
+  # Server identification
+  # ═══════════════════════════════════════════════════════════════
+  server_detection:
+    check_server_header: true
+    check_x_powered_by: true
+    check_via_header: true
+    fingerprint_error_pages: true
+
+# ============================================================================
+# TLS/SSL SETTINGS
+# ============================================================================
+tls:
+  basic_checks:
+    verify_certificate: true
+    check_expiration: true
+    check_hostname_match: true
+    check_self_signed: true
+  
+  protocols:
+    check_sslv3: true
+    check_tls10: true
+    check_tls11: true
+    check_tls12: true
+    check_tls13: true
+  
+  advanced:
+    enabled: false
+    check_cipher_suites: true
+    check_vulnerabilities: true
+    check_certificate_chain: true
+
+# ============================================================================
+# CONSENT TOKEN SETTINGS
+# ============================================================================
+consent:
+  token_expiry_hours: 48
+  token_hex_length: 16
+  http_verification_path: "/.well-known/"
+  dns_txt_prefix: "hephaestus-verify="
+  verification_retries: 3
+  verification_retry_delay: 2
+  
+  scopes:
+    safe: ["headers", "files", "server_info", "tls_basic"]
+    aggressive: ["http_methods_probe", "directory_listing_deep"]
+    pro: ["tls_deep_scan", "nmap_service_detect"]
+
+# ============================================================================
+# REPORTING
+# ============================================================================
+reporting:
+  format:
+    json: true
+    html: false
+  
+  json_indent: 2
+  
+  html:
+    include_evidence: true
+    include_raw_headers: false
+    css_inline: true
+    theme: "forge"
+
+# ============================================================================
+# LOGGING
+# ============================================================================
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  json_format: false
+  
+  redact:
+    enabled: true
+    patterns:
+      - "password"
+      - "token"
+      - "api_key"
+      - "secret"
+      - "authorization"
+      - "cookie"
+      - "db_password"
+      - "private_key"
+  
+  colors: true
+
+# ============================================================================
+# AI INTEGRATION (LangChain)
+# ============================================================================
+ai:
+  enabled: false
+  
+  langchain:
+    provider: "openai"
+    model: "gpt-4-turbo-preview"
+    temperature: 0.3
+    max_tokens: 2000
+    agent_type: "zero-shot-react-description"
+    ollama_base_url: "http://localhost:11434"
+    
+    memory:
+      enabled: true
+      type: "buffer"
+      max_history: 10
+  
+  api_key_env: "OPENAI_API_KEY"
+  prompts_dir: "config/prompts"
+  
+  sanitization:
+    remove_urls: false
+    remove_tokens: true
+    remove_credentials: true
+    remove_private_keys: true
+    remove_certificates: true
+    max_evidence_length: 500
+
+# ============================================================================
+# ADVANCED / EXPERIMENTAL
+# ============================================================================
+advanced:
+  max_workers: 5
+  cache_responses: false
+  cache_ttl_seconds: 3600
+  custom_headers: {}
+  
+  proxy:
+    http: null
+    https: null
+  
+  retry:
+    retries: 3
+    backoff: "exponential"
+    backoff_factor: 2
+    retry_on: [429, 500, 502, 503, 504]
+    no_retry_on: [400, 401, 403, 404]
+
+# ============================================================================
+# DOCKER / CONTAINER SETTINGS
+# ============================================================================
+docker:
+  in_container: false
+  container_report_dir: "/reports"
+  container_db_path: "/data/argos.db"
+
+# ============================================================================
+# SEVERITY MAPPING
+# ============================================================================
+severity_rules:
+  critical:
+    - "env_file_exposed"
+    - "git_repo_exposed"
+    - "phpinfo_exposed"
+    - "server_status_exposed"
+    - "database_backup_exposed"
+    - "private_key_exposed"
+    - "diagnostic_php_exposed"
+    - "nginx_status_exposed"
+  
+  high:
+    - "server_version_disclosed"
+    - "php_version_disclosed"
+    - "unsafe_http_method_enabled"
+    - "weak_tls_protocol"
+    - "certificate_expired"
+    - "self_signed_certificate"
+    - "config_backup_exposed"
+  
+  medium:
+    - "missing_hsts"
+    - "missing_csp"
+    - "directory_listing_enabled"
+    - "insecure_cookie"
+    - "trace_method_enabled"
+    - "missing_x_frame_options"
+    - "log_file_exposed"
+  
+  low:
+    - "missing_x_content_type_options"
+    - "missing_referrer_policy"
+    - "server_signature_enabled"
+    - "package_json_exposed"
+  
+  info:
+    - "server_detected"
+    - "tls_version_supported"
+    - "framework_detected"
+
+# ============================================================================
+# DETECTION PATTERNS
+# ============================================================================
+# Regex patterns for advanced file detection
+detection_patterns:
+  # SQL backup files with dates
+  sql_backups:
+    - pattern: ".*backup.*\\.sql$"
+      description: "SQL backup file"
+      severity: "critical"
+    
+    - pattern: ".*dump.*\\.sql$"
+      description: "SQL dump file"
+      severity: "critical"
+    
+    - pattern: ".*_backup_\\d{4}_\\d{2}_\\d{2}\\.sql$"
+      description: "SQL backup with date pattern (YYYY_MM_DD)"
+      severity: "critical"
+    
+    - pattern: ".*_dump_\\d{8}\\.sql$"
+      description: "SQL dump with date pattern (YYYYMMDD)"
+      severity: "critical"
+    
+    - pattern: "postgres_dump.*\\.sql$"
+      description: "PostgreSQL dump file"
+      severity: "critical"
+    
+    - pattern: "mysql_dump.*\\.sql$"
+      description: "MySQL dump file"
+      severity: "critical"
+  
+  # Config files with backup extensions
+  config_backups:
+    - pattern: "config\\.(php|yml|json|xml)\\.(old|save|bak|backup)$"
+      description: "Configuration file backup"
+      severity: "high"
+    
+    - pattern: "settings\\.(php|yml|json|xml)\\.(old|save|bak|backup)$"
+      description: "Settings file backup"
+      severity: "high"
+    
+    - pattern: "database\\.(php|yml|json|xml)\\.(old|save|bak|backup)$"
+      description: "Database config backup"
+      severity: "critical"
+  
+  # Log files
+  log_files:
+    - pattern: ".*\\.log(\\.old|\\.\\d+)?$"
+      description: "Log file or rotated log"
+      severity: "medium"

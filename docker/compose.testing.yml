@@ -1,0 +1,110 @@
+# ============================================================================
+# Hephaestus Testing Lab - Docker Compose
+# ============================================================================
+# Vulnerable web servers for safely testing Hephaestus scanner
+#
+# Services:
+#   - vulnerable-apache (ports 8080/8443): Apache 2.4 + PHP 7.4 with vulnerabilities
+#   - vulnerable-nginx (ports 8081/8444): Nginx 1.18 with vulnerabilities
+#
+# Auto-generated vulnerabilities:
+#   - .env files with secrets
+#   - .git repository exposure
+#   - phpinfo.php (Apache only)
+#   - server-status endpoints
+#   - Directory listing enabled
+#   - Weak TLS protocols
+#   - Server version disclosure
+#
+# Usage:
+#   docker compose -f docker/compose.testing.yml up -d
+#   docker compose -f docker/compose.testing.yml down
+#   docker compose -f docker/compose.testing.yml logs
+#
+# Quick test:
+#   curl http://localhost:8080/.env
+#   curl http://localhost:8081/.env
+# ============================================================================
+
+services:
+  vulnerable-apache:
+    image: php:7.4-apache
+    container_name: hephaestus-vulnerable-apache
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./vulnerable-apache/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+    networks:
+      - hephaestus-lab
+    entrypoint: ["/docker-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/.env"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "com.hephaestus.service=testing-lab"
+      - "com.hephaestus.server=apache"
+      - "com.hephaestus.version=0.1.0"
+
+  vulnerable-nginx:
+    image: nginx:1.18-alpine
+    container_name: hephaestus-vulnerable-nginx
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+      - "8444:443"
+    volumes:
+      - ./vulnerable-nginx/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+    networks:
+      - hephaestus-lab
+    entrypoint: ["/docker-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/.env"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "com.hephaestus.service=testing-lab"
+      - "com.hephaestus.server=nginx"
+      - "com.hephaestus.version=0.1.0"
+
+networks:
+  hephaestus-lab:
+    driver: bridge
+    name: hephaestus-lab
+    labels:
+      - "com.hephaestus.network=testing"
+
+# ============================================================================
+# Testing Instructions:
+# ============================================================================
+# 1. Start lab:
+#    docker compose -f docker/compose.testing.yml up -d
+#
+# 2. Wait 15 seconds for initialization:
+#    sleep 15
+#
+# 3. Verify services:
+#    docker compose -f docker/compose.testing.yml ps
+#
+# 4. Test vulnerabilities:
+#    curl http://localhost:8080/.env          # Apache .env
+#    curl http://localhost:8080/phpinfo.php   # PHP info leak
+#    curl http://localhost:8081/.env          # Nginx .env
+#    curl -I http://localhost:8080            # Version disclosure
+#
+# 5. Run Hephaestus scan:
+#    python -m heph --target http://localhost:8080
+#    python -m heph --target http://localhost:8081
+#
+# 6. Stop lab:
+#    docker compose -f docker/compose.testing.yml down
+#
+# 7. Remove all data:
+#    docker compose -f docker/compose.testing.yml down -v
+# ============================================================================
