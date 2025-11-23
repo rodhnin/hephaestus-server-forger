@@ -30,6 +30,12 @@ By participating in this project, you agree to maintain a respectful, inclusive,
 
 ## How Can I Contribute?
 
+### Security Vulnerabilities
+
+**DO NOT** open public issues for security vulnerabilities!
+
+Contact me on [https://rodhnin.com](https://rodhnin.com).
+
 ### Reporting Bugs
 
 Before creating bug reports, please:
@@ -535,8 +541,7 @@ hephaestus-server-forger/
 ├── setup.py                   # Package setup
 ├── requirements.txt           # Dependencies
 ├── README.md                  # Main documentation
-├── CONTRIBUTING.md            # This file
-└── SECURITY.md                # Security policy
+└── CONTRIBUTING.md            # This file
 ```
 
 ---
@@ -552,4 +557,25 @@ For security vulnerabilities, please see our [Security Policy](SECURITY.md).
 
 ---
 
-**Thank you for contributing to Hephaestus!** Your efforts help make server security more accessible to everyone.
+## 📞 Questions?
+
+-   **General questions**: Open a GitHub Discussion
+-   **Bug reports**: Open a GitHub Issue
+-   **Project maintainer**: [rodhnin](https://github.com/rodhnin) | [https://rodhnin.com](https://rodhnin.com)
+
+---
+
+## 📜 License
+
+By contributing to Hephaestus, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+
+---
+
+**Thank you for helping make web security auditing more accessible!** 🛡️
+
+Part of the **Argos Security Suite**:
+
+-   👁️ [Argus](https://github.com/rodhnin/argus-wp-watcher) - WordPress Security Scanner
+-   🐂 [Asterion](https://github.com/rodhnin/asterion-network-minotaur) - Network Security Auditor
+-   🔮 [Pythia](https://github.com/rodhnin/pythia-sql-clairvoyance) - SQL Injection Detection Scanner
+-   🔥 **Hephaestus** - Vulnerability Server Scanner (this project)
