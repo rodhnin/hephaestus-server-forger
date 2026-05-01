@@ -1,0 +1,241 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://rodhnin.github.io/argos/report.schema.json",
+    "title": "Argos Suite Security Report",
+    "description": "Hephaestus (server) v0.2.0",
+    "type": "object",
+    "required": ["tool", "version", "target", "date", "mode", "summary", "findings"],
+    "properties": {
+        "tool": {
+            "type": "string",
+            "enum": ["argus", "hephaestus", "pythia", "asterion"],
+            "description": "Tool that generated this report"
+        },
+        "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "description": "Tool version (semantic versioning)",
+            "examples": ["0.1.0", "0.2.0"]
+        },
+        "target": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Target URL or domain scanned"
+        },
+        "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Scan completion timestamp (ISO 8601 UTC)"
+        },
+        "mode": {
+            "type": "string",
+            "enum": ["safe", "aggressive", "offline"],
+            "description": "Scan mode"
+        },
+        "summary": {
+            "type": "object",
+            "required": ["critical", "high", "medium", "low", "info"],
+            "description": "Count of findings by severity level",
+            "properties": {
+                "critical": { "type": "integer", "minimum": 0 },
+                "high":     { "type": "integer", "minimum": 0 },
+                "medium":   { "type": "integer", "minimum": 0 },
+                "low":      { "type": "integer", "minimum": 0 },
+                "info":     { "type": "integer", "minimum": 0 }
+            },
+            "additionalProperties": true
+        },
+        "findings": {
+            "type": "array",
+            "description": "List of security findings/vulnerabilities detected",
+            "items": {
+                "type": "object",
+                "required": ["id", "title", "severity", "confidence", "recommendation"],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "pattern": "^[A-Z]+-[A-Z]+-\\d{3}$",
+                        "description": "Unique finding identifier (e.g., HEPH-SRV-001)"
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "type": "string",
+                        "enum": ["critical", "high", "medium", "low", "info"]
+                    },
+                    "confidence": {
+                        "type": "string",
+                        "enum": ["high", "medium", "low"]
+                    },
+                    "evidence": {
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": ["url", "header", "body", "path", "screenshot", "content_preview", "other"]
+                            },
+                            "value":   { "type": "string" },
+                            "context": { "type": "string" }
+                        },
+                        "additionalProperties": false
+                    },
+                    "recommendation": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "references": {
+                        "type": "array",
+                        "items": { "type": "string", "format": "uri" }
+                    },
+                    "cve": {
+                        "type": "array",
+                        "items": { "type": "string", "pattern": "^CVE-\\d{4}-\\d{4,}$" }
+                    },
+                    "affected_component": {
+                        "type": "string"
+                    },
+                    "owasp": {
+                        "type": "object",
+                        "description": "OWASP Top 10 2021 mapping (v0.2.0)",
+                        "properties": {
+                            "id":   { "type": "string", "pattern": "^A\\d{2}$" },
+                            "name": { "type": "string" }
+                        },
+                        "additionalProperties": false
+                    },
+                    "vulnerabilities": {
+                        "type": "array",
+                        "description": "Known CVE records with CVSS enrichment (v0.2.0)",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "cve_id":      { "type": "string" },
+                                "title":       { "type": "string" },
+                                "description": { "type": "string" },
+                                "link":        { "type": "string" },
+                                "cvss_score":  { "type": "number" },
+                                "cwe_id":      { "type": "string" },
+                                "cwe_name":    { "type": "string" }
+                            },
+                            "additionalProperties": true
+                        }
+                    },
+                    "cvss": {
+                        "type": "number",
+                        "description": "CVSS base score for the finding (v0.2.0)",
+                        "minimum": 0,
+                        "maximum": 10
+                    },
+                    "tls_grade": {
+                        "type": "string",
+                        "description": "SSL Labs-style grade for TLS findings (v0.2.0)"
+                    }
+                },
+                "additionalProperties": true
+            }
+        },
+        "notes": {
+            "type": "object",
+            "description": "Additional metadata and scanning context",
+            "properties": {
+                "scan_duration_seconds": { "type": "number", "minimum": 0 },
+                "requests_sent":         { "type": "integer", "minimum": 0 },
+                "rate_limit_applied":    { "type": "boolean" },
+                "scope_limitations":     { "type": "string" },
+                "false_positive_disclaimer": { "type": "string" }
+            },
+            "additionalProperties": true
+        },
+        "consent": {
+            "type": "object",
+            "description": "Ownership verification details",
+            "properties": {
+                "method": { "type": "string", "enum": ["http", "dns"] },
+                "token":  { "type": "string", "pattern": "^verify-[a-f0-9]{16}$" },
+                "verified_at": { "type": "string", "format": "date-time" }
+            },
+            "required": ["method", "token", "verified_at"],
+            "additionalProperties": false
+        },
+        "ai_analysis": {
+            "type": "object",
+            "description": "AI-generated summaries (v0.2.0 — standard, agent, or compare mode)",
+            "properties": {
+                "executive_summary":    { "type": "string" },
+                "technical_remediation": { "type": "string" },
+                "agent_analysis":       { "type": "string", "description": "Agent mode output (IMPROV-008)" },
+                "generated_at":         { "type": "string", "format": "date-time" },
+                "model_used":           { "type": "string" },
+                "comparison_mode":      { "type": "boolean" },
+                "providers_compared":   { "type": "array", "items": { "type": "string" } },
+                "results":              { "type": "object", "description": "Compare mode per-provider results" },
+                "cost": {
+                    "type": "object",
+                    "description": "AI cost metadata (IMPROV-005)",
+                    "properties": {
+                        "total_usd": { "type": "number" },
+                        "provider":  { "type": "string" },
+                        "model":     { "type": "string" }
+                    },
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": true
+        },
+        "diff": {
+            "type": "object",
+            "description": "Comparison with a previous scan (IMPROV-004)",
+            "properties": {
+                "ref_scan_id":  { "type": "integer" },
+                "ref_date":     { "type": "string" },
+                "ref_target":   { "type": "string" },
+                "ref_mode":     { "type": "string" },
+                "current_mode": { "type": "string" },
+                "mode_mismatch": { "type": "boolean" },
+                "new":        { "type": "array" },
+                "fixed":      { "type": "array" },
+                "persisting": { "type": "array" }
+            },
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": false,
+    "examples": [
+        {
+            "tool": "hephaestus",
+            "version": "0.2.0",
+            "target": "https://example.com",
+            "date": "2026-01-15T14:30:00Z",
+            "mode": "safe",
+            "summary": {
+                "critical": 1,
+                "high": 2,
+                "medium": 4,
+                "low": 3,
+                "info": 8
+            },
+            "findings": [
+                {
+                    "id": "HEPH-FILE-001",
+                    "title": "Environment file exposed (.env)",
+                    "severity": "critical",
+                    "confidence": "high",
+                    "evidence": {
+                        "type": "url",
+                        "value": "https://example.com/.env",
+                        "context": "HTTP 200, file size: 1247 bytes"
+                    },
+                    "recommendation": "Move .env outside document root.",
+                    "owasp": { "id": "A05", "name": "Security Misconfiguration" }
+                }
+            ]
+        }
+    ]
+}
