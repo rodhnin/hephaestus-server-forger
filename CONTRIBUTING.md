@@ -50,7 +50,7 @@ Before creating bug reports, please:
 **Bug Report Template**:
 
 ```markdown
-**Hephaestus Version**: 0.1.0
+**Hephaestus Version**: 0.2.0
 **Python Version**: 3.11.5
 **OS**: Ubuntu 22.04
 
@@ -132,8 +132,8 @@ pip install -e ".[dev]"  # Installs pytest, black, flake8, mypy
 **4. Verify installation**
 
 ```bash
-python -m heph --version  # Should show: Hephaestus v0.1.0
-python -m pytest          # Run test suite (55 tests)
+python -m heph --version  # Should show: Hephaestus v0.2.0
+python -m pytest          # Run test suite
 ```
 
 **5. Set up vulnerable testing labs (optional)**
@@ -320,9 +320,9 @@ from heph.core.config import Config
 def test_config_default_values():
     """Test that Config loads with correct defaults."""
     config = Config()
-    assert config.general.version == "0.1.0"
+    assert config.general.version == "0.2.0"
     assert config.scan.timeout == 10
-    assert config.scan.rate_limit == 3
+    assert config.scan.rate_limit == 5
 
 def test_config_custom_values():
     """Test that Config can be customized."""
@@ -349,8 +349,8 @@ def test_apache_scan_detects_vulnerabilities(vulnerable_server):
     result = main(["--target", vulnerable_server, "--json"])
     findings = result["findings"]
 
-    assert any(f["id"] == "SENS-001" for f in findings)  # .env
-    assert any(f["id"] == "SENS-004" for f in findings)  # phpinfo.php
+    assert any(f["id"] == "HEPH-FILE-002" for f in findings)  # .env
+    assert any(f["id"] == "HEPH-FILE-003" for f in findings)  # phpinfo.php
 ```
 
 ### Running Tests
@@ -497,51 +497,62 @@ Closes #issue_number
 ```
 hephaestus-server-forger/
 ├── heph/                      # Main package
-│   ├── __init__.py            # Package metadata
-│   ├── cli.py                 # CLI entry point
-│   ├── core/                  # Core functionality
-│   │   ├── config.py          # Configuration management
-│   │   ├── findings.py        # Finding dataclass
-│   │   ├── scanner.py         # Main scanner logic
-│   │   └── consent.py         # Consent token system
-│   ├── checks/                # Vulnerability check modules
-│   │   ├── server_info.py     # Server detection
-│   │   ├── sensitive_files.py # File exposure checks
-│   │   ├── headers.py         # Security headers
-│   │   ├── methods.py         # HTTP methods
-│   │   ├── ssl.py             # TLS/SSL checks
-│   │   └── directory.py       # Directory listing
-│   ├── ai/                    # AI integration
-│   │   ├── providers.py       # OpenAI, Anthropic, Ollama
-│   │   └── prompts.py         # Prompt templates
-│   ├── db/                    # Database operations
-│   │   ├── manager.py         # SQLite operations
-│   │   └── schema.py          # Database schema
-│   └── utils/                 # Utilities
-│       ├── logger.py          # Logging configuration
-│       ├── http.py            # HTTP helpers
-│       └── decorators.py      # Rate limiting, retries
-├── templates/                 # Jinja2 templates
-│   └── report.html.j2         # HTML report template
-├── config/                    # Configuration files
-│   ├── defaults.yaml          # Default configuration
-│   └── prompts/               # AI prompt templates
-├── tests/                     # Test suite
+│   ├── __init__.py            # Package metadata (version)
+│   ├── __main__.py            # Entry point (python -m heph)
+│   ├── cli.py                 # CLI (30+ flags)
+│   ├── scanner.py             # Orchestrator — 13 parallel phases
+│   ├── checks/                # Scan phase modules
+│   │   ├── server_info.py     # Phase 1: Server/version fingerprinting
+│   │   ├── files.py           # Phase 2: 70+ sensitive file paths
+│   │   ├── http_methods.py    # Phase 3: TRACE/PUT/DELETE detection
+│   │   ├── headers.py         # Phase 4: Security headers + cookies
+│   │   ├── config.py          # Phase 5: Directory listing
+│   │   ├── tls.py             # Phase 6: TLS/SSL deep analysis (SSLyze)
+│   │   ├── ports.py           # Phase 7: Port scanner
+│   │   ├── cors.py            # Phase 8: CORS misconfiguration (COR-001..006)
+│   │   ├── robots.py          # Phase 9: robots.txt intelligence (ROB-001..003)
+│   │   ├── waf.py             # Phase 10: WAF detection (13 signatures)
+│   │   ├── api_discovery.py   # Phase 11: API/Swagger/GraphQL discovery
+│   │   ├── cookies.py         # Phase 12: Multi-cookie security analysis
+│   │   └── phpinfo.py         # Phase 13: phpinfo() deep analysis (PHP-001..009)
+│   └── core/                  # Shared infrastructure
+│       ├── ai.py              # AI analysis (streaming, compare, agent, budget)
+│       ├── config.py          # Config loader (defaults.yaml)
+│       ├── consent.py         # Consent token verification
+│       ├── db.py              # SQLite — ~/.argos/argos.db (shared with Argus)
+│       ├── diff.py            # Diff reports (--diff last / --diff <scan_id>)
+│       ├── http_client.py     # Rate-limited HTTP session
+│       ├── logging.py         # Structured logging
+│       ├── owasp.py           # OWASP 2021 mapper for all HEPH-* codes
+│       └── report.py          # JSON + HTML report generation
+├── templates/
+│   └── report.html.j2         # HTML report (filter bar, CVE badges, AI tabs)
+├── schema/
+│   └── report.schema.json     # JSON schema for report validation
+├── config/
+│   ├── defaults.yaml          # All configurable settings
+│   └── prompts/               # AI prompt templates (technical.txt, non_technical.txt)
+├── db/
+│   └── migrate.sql            # Argos Suite shared DB schema
+├── docker/
+│   ├── vulnerable-apache/     # Apache lab (42 findings safe)
+│   │   └── docker-entrypoint.sh
+│   ├── vulnerable-nginx/      # Nginx lab (25 findings safe)
+│   │   └── docker-entrypoint.sh
+│   ├── compose.yml            # Production
+│   ├── compose.testing.yml    # Testing labs (Apache :8080/:8443, Nginx :8081/:8444)
+│   ├── deploy.sh              # Interactive deploy script
+│   └── Dockerfile             # Production image
+├── tests/                     # Test suite (55 tests)
 │   ├── unit/
 │   ├── integration/
 │   └── conftest.py
-├── docker/                     # Docker deployment
-│   ├── vulnerable-apache/                 # Vulnerable Apache lab script
-│   │   └── docker-entrypoint.sh
-│   ├── vulnerable-nginx/                  # Vulnerable Nginx lab script
-│   │   └── docker-entrypoint.sh
-│   ├── compose.yml
-│   └── Dockerfile              # Production image
 ├── docs/                      # Documentation
-├── setup.py                   # Package setup
-├── requirements.txt           # Dependencies
-├── README.md                  # Main documentation
-└── CONTRIBUTING.md            # This file
+├── assets/                    # ASCII art, media
+├── setup.py
+├── requirements.txt
+├── README.md
+└── CONTRIBUTING.md
 ```
 
 ---

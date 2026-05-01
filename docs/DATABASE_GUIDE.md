@@ -1,9 +1,9 @@
 # Hephaestus Database Guide
 
-**Database:** SQLite 3.x  
-**Location:** `~/.argos/argos.db` (shared with Argos ecosystem)  
-**Schema Version:** 1.0  
-**Last Updated:** October 21, 2025
+**Database:** SQLite 3.x
+**Location:** `~/.argos/argos.db` (shared with Argos ecosystem)
+**Schema Version:** 2.0
+**Last Updated:** May 2026
 
 ---
 
@@ -11,16 +11,16 @@
 
 Hephaestus uses the **shared Argos SQLite database** for persistent storage of:
 
--   Server configuration scan history
--   Security findings (misconfigurations, exposed files, missing headers)
--   Consent verification tokens (aggressive mode)
--   Client/project information
+- Server configuration scan history
+- Security findings (misconfigurations, exposed files, missing headers)
+- Consent verification tokens (aggressive mode)
+- Client/project information
 
 **Key Difference from Argus:**
 
--   Hephaestus scans have `tool = 'hephaestus'` in the `scans` table
--   Findings use `HEPH-*` codes instead of `ARGUS-*` codes
--   Focus on **server-level security** rather than WordPress-specific issues
+- Hephaestus scans have `tool = 'hephaestus'` in the `scans` table
+- Findings use `HEPH-*` codes instead of `ARGUS-*` codes
+- Focus on **server-level security** rather than WordPress-specific issues
 
 **Note:** This guide provides SQL query examples. An interactive CLI is planned for v0.3.0.
 
@@ -70,10 +70,10 @@ CREATE INDEX idx_consent_verified ON consent_tokens(verified_at);
 
 **Hephaestus Usage:**
 
--   Aggressive mode (`--aggressive`) requires consent verification
--   Tokens generated with format: `verify-XXXX`
--   HTTP method: Place token file at `/.well-known/hephaestus-verify.txt`
--   DNS method: Add TXT record `_hephaestus-verify.domain.com`
+- Aggressive mode (`--aggressive`) requires consent verification
+- Tokens generated with format: `verify-XXXX`
+- HTTP method: Place token file at `/.well-known/hephaestus-verify.txt`
+- DNS method: Add TXT record `_hephaestus-verify.domain.com`
 
 ---
 
@@ -106,18 +106,18 @@ CREATE INDEX idx_scans_status ON scans(status);
 
 **Hephaestus-Specific Values:**
 
--   `tool`: Always `'hephaestus'`
--   `mode`: `'safe'` (default) or `'aggressive'` (requires consent)
--   `status`:
-    -   `'running'`: Scan in progress
-    -   `'completed'`: Scan finished successfully (21 findings for Apache, 13 for Nginx)
-    -   `'failed'`: Connection error (port closed, DNS failure, timeout)
-    -   `'aborted'`: User cancelled
+- `tool`: Always `'hephaestus'`
+- `mode`: `'safe'` (default) or `'aggressive'` (requires consent)
+- `status`:
+    - `'running'`: Scan in progress
+    - `'completed'`: Scan finished successfully (42 findings for Apache, 25 for Nginx in v0.2.0)
+    - `'failed'`: Connection error (port closed, DNS failure, timeout)
+    - `'aborted'`: User cancelled
 
 **Typical Durations:**
 
--   Apache (localhost:8080): ~21-25s (71 requests, 21 findings)
--   Nginx (localhost:8081): ~8-22s (71 requests, 13 findings)
+- Apache (localhost:8080): ~30-35s (13 scan phases, 42 findings)
+- Nginx (localhost:8081): ~30-35s (13 scan phases, 25 findings)
 
 ---
 
@@ -145,23 +145,61 @@ CREATE INDEX idx_findings_severity ON findings(severity);
 CREATE INDEX idx_findings_code ON findings(finding_code);
 ```
 
-**Hephaestus Finding Codes:**
+**Hephaestus Finding Codes (70+ total):**
 
-| Code Prefix   | Category         | Examples                               |
-| ------------- | ---------------- | -------------------------------------- |
-| `HEPH-SRV-*`  | Server Info      | Version disclosure, error page leaks   |
-| `HEPH-FILE-*` | Sensitive Files  | .env, .git, phpinfo.php, server-status |
-| `HEPH-HTTP-*` | HTTP Methods     | TRACE enabled, unsafe methods          |
-| `HEPH-HDR-*`  | Security Headers | HSTS, CSP, X-Frame-Options missing     |
-| `HEPH-CFG-*`  | Configuration    | Directory listing enabled              |
-| `HEPH-TLS-*`  | TLS/SSL          | TLS not enabled, weak ciphers          |
+| Code Prefix   | Category         | Examples                                         |
+| ------------- | ---------------- | ------------------------------------------------ |
+| `HEPH-SRV-*`  | Server Info      | Version disclosure, error page leaks             |
+| `HEPH-FILE-*` | Sensitive Files  | .env, .git, phpinfo.php, server-status           |
+| `HEPH-HTTP-*` | HTTP Methods     | TRACE enabled, unsafe methods                    |
+| `HEPH-HDR-*`  | Security Headers | HSTS, CSP, X-Frame-Options missing               |
+| `HEPH-CFG-*`  | Configuration    | Directory listing, config file misconfigurations |
+| `HEPH-TLS-*`  | TLS/SSL          | TLS not enabled, weak ciphers, CVE-correlated    |
+| `COR-*`       | CORS             | Wildcard, null-origin, reflected origin          |
+| `ROB-*`       | Robots.txt       | Disallowed paths, accessible sensitive paths     |
+| `WAF-*`       | WAF Detection    | Cloudflare, Sucuri, ModSecurity, AWS WAF         |
+| `API-*`       | API Discovery    | Swagger, GraphQL, unauthenticated endpoints      |
+| `COO-*`       | Cookie Security  | Missing HttpOnly, Secure, SameSite flags         |
+| `PHP-*`       | phpinfo Analysis | display_errors, allow_url_include, open_basedir  |
 
 **Evidence Types:**
 
--   `header`: HTTP response header
--   `body`: Response body content
--   `url`: Accessible URL
--   `other`: Custom evidence
+- `header`: HTTP response header
+- `body`: Response body content
+- `url`: Accessible URL
+- `other`: Custom evidence
+
+---
+
+---
+
+#### 5. `ai_costs`
+
+Tracks per-scan AI token usage and costs (added in v0.2.0, shared with Argus).
+
+```sql
+CREATE TABLE IF NOT EXISTS ai_costs (
+    cost_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scan_id INTEGER,
+    tool TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    model TEXT NOT NULL,
+    analysis_type TEXT,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    cost_usd REAL,
+    duration_s REAL,
+    created_at TEXT DEFAULT (datetime('now', 'utc')),
+    FOREIGN KEY (scan_id) REFERENCES scans(scan_id) ON DELETE SET NULL
+);
+```
+
+**Hephaestus Usage:**
+
+- Populated when `--use-ai` is used with `--ai-budget` or globally enabled
+- `tool` field is always `'hephaestus'`
+- `analysis_type`: `'executive_summary'`, `'technical_guide'`, `'agent'`, `'compare'`
+- Costs file also written to `~/.argos/costs.json` (shared with Argus)
 
 ---
 
@@ -194,7 +232,7 @@ scan_id | domain         | mode | status    | started_at          | duration_sec
 --------|----------------|------|-----------|---------------------|--------------|--------
 83      | example.com    | safe | failed    | 2025-10-21 19:07:57 | NULL         | NULL
 82      | localhost:9999 | safe | failed    | 2025-10-21 19:06:24 | NULL         | NULL
-81      | localhost:8080 | safe | completed | 2025-10-21 19:01:56 | 21.47        | {"critical": 6, ...}
+81      | localhost:8080 | safe | completed | 2026-04-01 10:01:56 | 32.15        | {"critical": 8, ...}
 ```
 
 ---
@@ -224,7 +262,7 @@ GROUP BY s.scan_id;
 ```
 scan_id | domain         | total_findings | critical | high | medium | low
 --------|----------------|----------------|----------|------|--------|----
-81      | localhost:8080 | 21             | 6        | 2    | 8      | 5
+81      | localhost:8080 | 42             | 8        | 4    | 18     | 12
 ```
 
 ---
@@ -539,8 +577,8 @@ GROUP BY server_type;
 ```
 server_type | scans | total_findings | avg_findings_per_scan | critical
 ------------|-------|----------------|----------------------|----------
-Apache      | 45    | 945            | 21.00                | 270
-Nginx       | 30    | 390            | 13.00                | 90
+Apache      | 45    | 1890           | 42.00                | 540
+Nginx       | 30    | 750            | 25.00                | 180
 ```
 
 ---
@@ -682,21 +720,21 @@ conn.close()
 
 ### Apache Server (localhost:8080)
 
-**Scan Characteristics:**
+**Scan Characteristics (v0.2.0):**
 
--   Duration: ~21-25 seconds
--   Requests: 71 HTTP requests
--   Rate limit: 3 req/s (default)
--   Total findings: **21**
+- Duration: ~30-35 seconds (13 scan phases)
+- Rate limit: 5 req/s (default)
+- Total findings: **42**
 
 **Finding Distribution:**
 
 ```json
 {
-    "critical": 6, // .env, 2x.git, 2xphpinfo, server-status
-    "high": 2, // Apache version, TLS missing
-    "medium": 8, // 2xTRACE, 4xheaders, directory listing, error page
-    "low": 5 // 2x.htaccess (403), 3xheaders
+    "critical": 6,
+    "high": 4,
+    "medium": 18,
+    "low": 10,
+    "info": 4
 }
 ```
 
@@ -704,21 +742,21 @@ conn.close()
 
 ### Nginx Server (localhost:8081)
 
-**Scan Characteristics:**
+**Scan Characteristics (v0.2.0):**
 
--   Duration: ~8-22 seconds
--   Requests: 71 HTTP requests
--   Rate limit: 3 req/s (default)
--   Total findings: **13**
+- Duration: ~30-35 seconds (13 scan phases)
+- Rate limit: 5 req/s (default)
+- Total findings: **25**
 
 **Finding Distribution:**
 
 ```json
 {
-    "critical": 3, // .env, 2x.git
-    "high": 2, // Nginx version, TLS missing
-    "medium": 5, // 3xheaders, directory listing, error page
-    "low": 3 // 3xheaders
+    "critical": 3,
+    "high": 3,
+    "medium": 12,
+    "low": 6,
+    "info": 1
 }
 ```
 
@@ -781,9 +819,9 @@ HAVING findings = 0;
 
 **Possible Causes:**
 
--   Scan failed early (check error_message)
--   Target is too secure (unlikely)
--   Database write error
+- Scan failed early (check error_message)
+- Target is too secure (unlikely)
+- Database write error
 
 ---
 
@@ -813,12 +851,13 @@ cp /tmp/argos-backup-20251021.db ~/.argos/argos.db
 
 ## Schema Version History
 
-| Version | Date     | Changes                             |
-| ------- | -------- | ----------------------------------- |
-| **1.0** | Nov 2025 | Initial schema (Phase 10 validated) |
+| Version | Date     | Changes                                         |
+| ------- | -------- | ----------------------------------------------- |
+| **1.0** | Jan 2026 | Initial schema (Phase 10 validated)             |
+| **2.0** | May 2026 | Added `ai_costs` table; 13 phases; 70+ findings |
 
 ---
 
-**Last Updated:** November 22, 2025  
-**Schema Version:** 1.0  
-**Tool Version:** Hephaestus v0.1.0
+**Last Updated:** May 2026
+**Schema Version:** 2.0
+**Tool Version:** Hephaestus v0.2.0

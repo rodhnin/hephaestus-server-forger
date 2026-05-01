@@ -7,7 +7,6 @@ to prevent overwhelming target servers during security audits.
 Used by Hephaestus for all server security checks.
 
 Author: Rodney Dhavid Jimenez Chacin (rodhnin)
-Modified by: Claude (Token Bucket implementation v2)
 License: MIT
 """
 

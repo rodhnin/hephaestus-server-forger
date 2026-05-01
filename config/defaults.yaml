@@ -1,12 +1,12 @@
-# Hephaestus - Improved Configuration v0.1.0
+# Hephaestus - Configuration v0.2.0
 # Based on validation lab findings - Improved detection rates
-# Changes: Added missing patterns found in lab testing
+# Changes: v0.2.0 features: AI cost tracking, streaming, agent, compare, OWASP, CVE, diff
 
 # ============================================================================
 # GENERAL SETTINGS
 # ============================================================================
 general:
-  version: "0.1.0"
+  version: "0.2.0"
   author: "Rodney Dhavid Jimenez Chacin (rodhnin)"
   github: "https://github.com/rodhnin/hephaestus-server-forger"
   contact: "https://rodhnin.com"
@@ -34,7 +34,7 @@ scan:
     connect: 15
     read: 45
   
-  user_agent: "Hephaestus/0.1.0"
+  user_agent: "Hephaestus/0.2.0"
   
   follow_redirects: true
   max_redirects: 3
@@ -207,6 +207,62 @@ server:
     fingerprint_error_pages: true
 
 # ============================================================================
+# PORT SCANNING (v0.2.0)
+# ============================================================================
+port_scan:
+  enabled: true
+  timeout: 3           # TCP connect timeout per port (seconds)
+  max_workers: 20      # Parallel port probes
+  cve_enrichment: true # Look up CVEs for detected service versions via NVD API
+  banner_grab: true    # Grab service banners for version detection
+  ports:
+    # ─── Infrastructure ──────────────────────────────────────────────────────
+    - 21     # FTP
+    - 22     # SSH
+    - 25     # SMTP
+    - 110    # POP3
+    - 143    # IMAP
+    - 465    # SMTPS
+    - 587    # SMTP Submission
+    # ─── Relational databases ─────────────────────────────────────────────────
+    - 1433   # Microsoft SQL Server
+    - 1521   # Oracle Database
+    - 3306   # MySQL / MariaDB
+    - 5432   # PostgreSQL
+    # ─── NoSQL / caches ──────────────────────────────────────────────────────
+    - 5984   # CouchDB
+    - 6379   # Redis
+    - 11211  # Memcached
+    - 27017  # MongoDB
+    - 27018  # MongoDB (alt)
+    # ─── Search / time-series ────────────────────────────────────────────────
+    - 9200   # Elasticsearch HTTP
+    - 9300   # Elasticsearch TCP
+    - 8086   # InfluxDB
+    # ─── Message queues ──────────────────────────────────────────────────────
+    - 5672   # RabbitMQ AMQP
+    - 15672  # RabbitMQ Management
+    # ─── Dev / app servers ───────────────────────────────────────────────────
+    - 3000   # Node.js / React / Next.js
+    - 4000   # Generic dev/API server
+    - 4200   # Angular CLI dev server
+    - 5000   # Flask / generic dev
+    - 8000   # Django / generic dev
+    - 8080   # HTTP alt
+    - 8443   # HTTPS alt
+    - 8888   # Jupyter Notebook
+    - 9000   # PHP-FPM / dev
+    # ─── Admin / monitoring ──────────────────────────────────────────────────
+    - 2181   # Zookeeper
+    - 4848   # GlassFish Admin
+    - 7001   # WebLogic Admin
+    - 8161   # ActiveMQ Web Console
+    - 9090   # Prometheus
+    - 3001   # Grafana
+    # ─── Big data ────────────────────────────────────────────────────────────
+    - 50070  # Hadoop NameNode HTTP UI
+
+# ============================================================================
 # TLS/SSL SETTINGS
 # ============================================================================
 tls:
@@ -224,7 +280,7 @@ tls:
     check_tls13: true
   
   advanced:
-    enabled: false
+    enabled: true
     check_cipher_suites: true
     check_vulnerabilities: true
     check_certificate_chain: true
@@ -289,23 +345,27 @@ logging:
 # ============================================================================
 ai:
   enabled: false
-  
+
   langchain:
     provider: "openai"
-    model: "gpt-4-turbo-preview"
+    model: "gpt-4o-mini-2024-07-18"
     temperature: 0.3
     max_tokens: 2000
-    agent_type: "zero-shot-react-description"
     ollama_base_url: "http://localhost:11434"
-    
-    memory:
-      enabled: true
-      type: "buffer"
-      max_history: 10
-  
+
+  streaming: false
+
+  agent_max_iterations: 10
+
+  budget:
+    enabled: false
+    max_cost_per_scan: 1.0
+    warn_threshold: 0.8
+    abort_on_exceed: false
+
   api_key_env: "OPENAI_API_KEY"
   prompts_dir: "config/prompts"
-  
+
   sanitization:
     remove_urls: false
     remove_tokens: true

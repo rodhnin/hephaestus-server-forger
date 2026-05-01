@@ -16,7 +16,7 @@ Consent verification is **mandatory** for:
 
     - HTTP methods testing (PUT, DELETE, PATCH)
     - Deep file enumeration
-    - Increased request rate (8 req/s vs 3 req/s safe)
+    - Increased request rate (12 req/s vs 5 req/s safe)
     - Any potentially intrusive checks
 
 2. **`--use-ai` Flag**
@@ -374,7 +374,7 @@ Proof: https://example.com/.well-known/verify-a3f9b2c1d8e4f5a6.txt
 
 ```bash
 # View verified domains
-sqlite3 ~/.argos/argos.db "SELECT domain, token, method, verified_at, expires_at FROM consent_tokens WHERE tool='hephaestus' ORDER BY verified_at DESC"
+sqlite3 ~/.argos/argos.db "SELECT domain, token, method, verified_at, expires_at FROM consent_tokens ORDER BY verified_at DESC"
 ```
 
 **Output:**
@@ -609,6 +609,6 @@ python -m argus --target https://example.com --use-ai      # WordPress scan
 
 ---
 
-_Last Updated: 2025-10-21_  
+_Last Updated: May 2026_  
 _Version: 1.0_  
 _Tool: Hephaestus Server Forger_

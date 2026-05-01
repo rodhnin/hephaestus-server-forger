@@ -34,6 +34,7 @@ except ImportError:
 
 from .logging import get_logger
 from .config import get_config
+from .owasp import enrich_findings_with_owasp
 
 logger = get_logger(__name__)
 
@@ -65,17 +66,18 @@ class ReportGenerator:
     def _process_ai_content(self, ai_analysis: Dict[str, str]) -> Dict[str, str]:
         """
         Process AI-generated content: Convert markdown to HTML.
-        
+
+        Handles standard mode (executive_summary, technical_remediation),
+        agent mode (agent_analysis), and compare mode (results dict).
+
         Args:
-            ai_analysis: Dict with 'executive_summary' and/or 'technical_remediation'
-        
+            ai_analysis: Dict with AI analysis content
+
         Returns:
             Processed dict with HTML content
         """
         if not HAS_MARKDOWN:
             logger.warning("markdown package not installed, AI content won't be formatted")
-            logger.info("Install with: pip install markdown")
-            # Return original content with basic \n -> <br> conversion
             processed = {}
             for key, value in ai_analysis.items():
                 if isinstance(value, str):
@@ -83,15 +85,15 @@ class ReportGenerator:
                 else:
                     processed[key] = value
             return processed
-        
+
         # Configure markdown processor with extensions
         md = markdown.Markdown(
             extensions=[
-                'fenced_code',      # ```code blocks```
-                'tables',           # GFM tables
-                'nl2br',            # \n -> <br>
-                'sane_lists',       # Better list handling
-                'codehilite',       # Syntax highlighting
+                'fenced_code',
+                'tables',
+                'nl2br',
+                'sane_lists',
+                'codehilite',
             ],
             extension_configs={
                 'codehilite': {
@@ -100,22 +102,34 @@ class ReportGenerator:
                 }
             }
         )
-        
+
+        md_keys = {'executive_summary', 'technical_remediation', 'agent_analysis'}
+
+        def convert_str(text: str) -> str:
+            html = md.convert(text)
+            md.reset()
+            return html
+
         processed = {}
         for key, value in ai_analysis.items():
-            if key in ['executive_summary', 'technical_remediation'] and isinstance(value, str):
-                # Convert markdown to HTML
-                html_content = md.convert(value)
-                
-                # Reset markdown processor for next conversion
-                md.reset()
-                
-                processed[key] = html_content
-                logger.debug(f"Converted {key} from markdown to HTML ({len(value)} -> {len(html_content)} chars)")
+            if key in md_keys and isinstance(value, str):
+                processed[key] = convert_str(value)
+                logger.debug(f"Converted {key} from markdown to HTML ({len(value)} chars)")
+            elif key == 'results' and isinstance(value, dict):
+                # compare mode: convert per-provider markdown fields
+                converted_results = {}
+                for provider, pdata in value.items():
+                    if isinstance(pdata, dict):
+                        converted_results[provider] = {
+                            k: (convert_str(v) if k in md_keys and isinstance(v, str) else v)
+                            for k, v in pdata.items()
+                        }
+                    else:
+                        converted_results[provider] = pdata
+                processed[key] = converted_results
             else:
-                # Keep other fields as-is (generated_at, model_used, etc.)
                 processed[key] = value
-        
+
         return processed
     
     def create_report(
@@ -127,11 +141,12 @@ class ReportGenerator:
         scan_duration: Optional[float] = None,
         requests_sent: Optional[int] = None,
         consent: Optional[Dict[str, str]] = None,
-        ai_analysis: Optional[Dict[str, str]] = None
+        ai_analysis: Optional[Dict[str, str]] = None,
+        diff: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Create a structured report dictionary.
-        
+
         Args:
             tool: Tool name ('hephaestus')
             target: Target URL or domain
@@ -141,10 +156,14 @@ class ReportGenerator:
             requests_sent: Number of HTTP requests
             consent: Consent verification info
             ai_analysis: AI-generated summaries
-        
+            diff: Diff comparison with previous scan (IMPROV-004)
+
         Returns:
             Report dictionary conforming to schema
         """
+        # Enrich findings with OWASP Top 10 2021 mapping (v0.2.0)
+        enrich_findings_with_owasp(findings)
+
         # Calculate summary counts
         summary = {
             'critical': 0,
@@ -153,15 +172,15 @@ class ReportGenerator:
             'low': 0,
             'info': 0
         }
-        
+
         for finding in findings:
             severity = finding.get('severity', 'info')
             if severity in summary:
                 summary[severity] += 1
-        
+
         # Build report
         report = {
-            'tool': tool,  # 'hephaestus' for this tool
+            'tool': tool,
             'version': self.config.version,
             'target': target,
             'date': datetime.now(timezone.utc).isoformat() + 'Z',
@@ -169,7 +188,7 @@ class ReportGenerator:
             'summary': summary,
             'findings': findings
         }
-        
+
         # Add optional sections
         if scan_duration or requests_sent:
             notes = {}
@@ -183,13 +202,16 @@ class ReportGenerator:
                 "Manual verification recommended for all findings before remediation."
             )
             report['notes'] = notes
-        
+
         if consent:
             report['consent'] = consent
-        
+
         if ai_analysis:
             report['ai_analysis'] = ai_analysis
-        
+
+        if diff:
+            report['diff'] = diff
+
         return report
     
     def validate_report(self, report: Dict[str, Any]) -> bool:
@@ -311,6 +333,7 @@ class ReportGenerator:
             notes=report.get('notes'),
             consent=report.get('consent'),
             ai=ai_processed,
+            diff=report.get('diff'),
             contact=self.config.contact,
             theme='forge'
         )

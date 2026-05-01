@@ -29,15 +29,16 @@ is_valid = generator.validate_report(report)  # True/False
 ```json
 {
   "tool": "hephaestus",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "target": "http://localhost:8080",
-  "date": "2025-10-21T19:01:56Z",
+  "date": "2026-04-01T19:01:56Z",
   "mode": "safe",
   "summary": {...},
   "findings": [...],
   "notes": {...},
   "consent": {...},
-  "ai_analysis": {...}
+  "ai_analysis": {...},
+  "diff": {...}
 }
 ```
 
@@ -49,42 +50,42 @@ is_valid = generator.validate_report(report)  # True/False
 
 #### `tool` (string)
 
--   **Value**: `"hephaestus"`
--   **Purpose**: Identifies the security auditor
--   **Example**: `"hephaestus"`
+- **Value**: `"hephaestus"`
+- **Purpose**: Identifies the security auditor
+- **Example**: `"hephaestus"`
 
 #### `version` (string)
 
--   **Format**: Semantic versioning (X.Y.Z)
--   **Purpose**: Tool version for compatibility tracking
--   **Example**: `"0.1.0"`
+- **Format**: Semantic versioning (X.Y.Z)
+- **Purpose**: Tool version for compatibility tracking
+- **Example**: `"0.2.0"`
 
 #### `target` (string)
 
--   **Format**: Full URL or IP:port
--   **Purpose**: Scanned server identifier
--   **Examples**:
-    -   `"http://localhost:8080"`
-    -   `"https://example.com:443"`
-    -   `"http://192.168.1.100:80"`
+- **Format**: Full URL or IP:port
+- **Purpose**: Scanned server identifier
+- **Examples**:
+    - `"http://localhost:8080"`
+    - `"https://example.com:443"`
+    - `"http://192.168.1.100:80"`
 
 #### `date` (string)
 
--   **Format**: ISO 8601 (UTC with Z suffix)
--   **Purpose**: Scan completion timestamp
--   **Example**: `"2025-10-21T19:01:56Z"`
+- **Format**: ISO 8601 (UTC with Z suffix)
+- **Purpose**: Scan completion timestamp
+- **Example**: `"2025-10-21T19:01:56Z"`
 
 #### `mode` (string)
 
--   **Values**: `"safe"` or `"aggressive"`
--   **Purpose**: Scan depth indicator
--   **Example**: `"safe"`
+- **Values**: `"safe"`, `"aggressive"`, or `"offline"`
+- **Purpose**: Scan depth indicator
+- **Example**: `"safe"`
 
 #### `summary` (object)
 
--   **Purpose**: Quick overview of findings by severity
--   **Required keys**: `critical`, `high`, `medium`, `low`, `info`
--   **All values**: Non-negative integers
+- **Purpose**: Quick overview of findings by severity
+- **Required keys**: `critical`, `high`, `medium`, `low`, `info`
+- **All values**: Non-negative integers
 
 ```json
 "summary": {
@@ -98,18 +99,18 @@ is_valid = generator.validate_report(report)  # True/False
 
 #### `findings` (array)
 
--   **Purpose**: Detailed list of server security issues
--   **Items**: Finding objects (see below)
+- **Purpose**: Detailed list of server security issues
+- **Items**: Finding objects (see below)
 
 ---
 
 ## 🔍 Finding Categories
 
-Hephaestus organizes findings into specific categories:
+Hephaestus organizes findings into specific categories (70+ codes total):
 
 ### Server Configuration (SRV)
 
-Server identification, version disclosure, error pages
+Server identification, version disclosure, error pages, module/framework detection
 
 ### Security Headers (HDR)
 
@@ -117,7 +118,7 @@ Missing or misconfigured HTTP security headers
 
 ### Sensitive Files (FILE)
 
-Exposed configuration files, backups, credentials
+Exposed configuration files, backups, credentials (70+ paths)
 
 ### HTTP Methods (METH)
 
@@ -125,7 +126,7 @@ Dangerous HTTP methods enabled (TRACE, TRACK)
 
 ### TLS/SSL (TLS)
 
-Certificate issues, weak ciphers, outdated protocols
+Certificate issues, weak ciphers, outdated protocols, CVE-correlated findings
 
 ### Directory Listing (DIR)
 
@@ -134,6 +135,30 @@ Exposed directory indexes
 ### Authentication (AUTH)
 
 Missing or weak authentication mechanisms
+
+### CORS (COR)
+
+Cross-Origin Resource Sharing misconfigurations (COR-001 to COR-006)
+
+### Robots.txt Intelligence (ROB)
+
+Disallowed path analysis and accessibility probes (ROB-001/002/003)
+
+### WAF Detection (WAF)
+
+Web Application Firewall signatures: Cloudflare, Sucuri, ModSecurity, AWS WAF, Imperva (WAF-001/002)
+
+### API Discovery (API)
+
+Swagger/OpenAPI spec exposure, GraphQL introspection, unauthenticated endpoints (API-001 to API-005)
+
+### Cookie Security (COO)
+
+Per-cookie HttpOnly/Secure/SameSite analysis (COO-001 to COO-005)
+
+### PHP Configuration (PHP)
+
+phpinfo() dangerous setting detection (PHP-001 to PHP-009)
 
 ---
 
@@ -156,7 +181,20 @@ Each finding in the `findings` array:
     "recommendation": "Configure ServerTokens Prod in Apache configuration...",
     "references": ["https://httpd.apache.org/docs/2.4/mod/core.html#servertokens"],
     "cve": [],
-    "affected_component": "Apache HTTP Server 2.4.41"
+    "affected_component": "Apache HTTP Server 2.4.41",
+    "owasp": { "id": "A05", "name": "Security Misconfiguration" },
+    "vulnerabilities": [
+        {
+            "cve_id": "CVE-2023-45802",
+            "title": "HTTP/2 request smuggling",
+            "description": "...",
+            "link": "https://nvd.nist.gov/vuln/detail/CVE-2023-45802",
+            "cvss_score": 7.5,
+            "cwe_id": "CWE-444",
+            "cwe_name": "Inconsistent Interpretation of HTTP Requests"
+        }
+    ],
+    "cvss": 7.5
 }
 ```
 
@@ -174,6 +212,9 @@ Each finding in the `findings` array:
 | `references`         | ❌ No    | array  | External links (CVE, vendor docs, best practices)   |
 | `cve`                | ❌ No    | array  | CVE identifiers (format: `CVE-YYYY-NNNNN`)          |
 | `affected_component` | ❌ No    | string | Server component (Apache, Nginx, OpenSSL)           |
+| `owasp`              | ❌ No    | object | OWASP Top 10 2021 mapping (`id`, `name`)            |
+| `vulnerabilities`    | ❌ No    | array  | Live CVE findings from NVD API v2                   |
+| `cvss`               | ❌ No    | float  | CVSS score (from NVD or manual assignment)          |
 
 ---
 
@@ -205,16 +246,20 @@ Each finding in the `findings` array:
 
 ### Category Ranges
 
-| ID Range            | Category          | Description                   |
-| ------------------- | ----------------- | ----------------------------- |
-| `HEPH-SRV-000-009`  | Server Detection  | Server type identification    |
-| `HEPH-SRV-001-019`  | Server Disclosure | Version and information leaks |
-| `HEPH-HDR-001-019`  | Security Headers  | Missing or weak headers       |
-| `HEPH-FILE-001-039` | Sensitive Files   | Exposed configs, backups      |
-| `HEPH-METH-001-009` | HTTP Methods      | Dangerous methods enabled     |
-| `HEPH-TLS-001-019`  | TLS/SSL           | Certificate and cipher issues |
-| `HEPH-DIR-001-009`  | Directory Listing | Index exposure                |
-| `HEPH-AUTH-001-009` | Authentication    | Auth bypass, weak auth        |
+| ID Range            | Category         | Description                             |
+| ------------------- | ---------------- | --------------------------------------- |
+| `HEPH-SRV-000-019`  | Server Detection | Server type, version, framework leaks   |
+| `HEPH-HDR-001-019`  | Security Headers | Missing or weak headers, cookie flags   |
+| `HEPH-FILE-001-039` | Sensitive Files  | Exposed configs, backups, credentials   |
+| `HEPH-HTTP-001-009` | HTTP Methods     | Dangerous methods enabled               |
+| `HEPH-TLS-001-029`  | TLS/SSL          | Certificate, cipher, protocol issues    |
+| `HEPH-CFG-001-009`  | Configuration    | Directory listing, server config issues |
+| `HEPH-COR-001-006`  | CORS             | Cross-Origin Resource Sharing issues    |
+| `HEPH-ROB-001-003`  | Robots.txt       | Sensitive paths in robots.txt           |
+| `HEPH-WAF-001-002`  | WAF Detection    | Web Application Firewall fingerprint    |
+| `HEPH-API-001-005`  | API Discovery    | Exposed API docs, endpoints             |
+| `HEPH-COO-001-005`  | Cookie Security  | Missing Secure/HttpOnly/SameSite flags  |
+| `HEPH-PHP-001-009`  | phpinfo Analysis | Dangerous PHP settings exposed          |
 
 ### Examples
 
@@ -294,21 +339,44 @@ Each finding in the `findings` array:
 
 ## 📊 Complete Example Reports
 
+### Diff Section (v0.2.0)
+
+When `--diff last` or `--diff SCAN_ID` is used, the report includes a `diff` top-level section:
+
+```json
+{
+    "diff": {
+        "compared_to_scan_id": 81,
+        "compared_to_date": "2026-03-15T10:00:00Z",
+        "new_findings": ["HEPH-TLS-002", "COR-001"],
+        "fixed_findings": ["HEPH-FILE-005"],
+        "persisting_findings": ["HEPH-FILE-001", "HEPH-HDR-001"],
+        "summary": {
+            "new": 2,
+            "fixed": 1,
+            "persisting": 12
+        }
+    }
+}
+```
+
+---
+
 ### Apache Server - Safe Mode
 
 ```json
 {
     "tool": "hephaestus",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "target": "http://localhost:8080",
-    "date": "2025-10-21T19:01:56Z",
+    "date": "2026-04-01T19:01:56Z",
     "mode": "safe",
     "summary": {
         "critical": 6,
-        "high": 2,
-        "medium": 8,
-        "low": 5,
-        "info": 0
+        "high": 4,
+        "medium": 18,
+        "low": 10,
+        "info": 4
     },
     "findings": [
         {
@@ -388,7 +456,7 @@ Each finding in the `findings` array:
         }
     ],
     "notes": {
-        "scan_duration_seconds": 21.45,
+        "scan_duration_seconds": 31.24,
         "requests_sent": 142,
         "rate_limit_applied": false,
         "scope_limitations": "Safe mode: non-intrusive checks only",
@@ -402,16 +470,16 @@ Each finding in the `findings` array:
 ```json
 {
     "tool": "hephaestus",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "target": "https://example.com",
-    "date": "2025-10-21T20:15:30Z",
+    "date": "2026-04-01T20:15:30Z",
     "mode": "aggressive",
     "summary": {
         "critical": 3,
-        "high": 2,
-        "medium": 5,
-        "low": 3,
-        "info": 0
+        "high": 3,
+        "medium": 12,
+        "low": 6,
+        "info": 1
     },
     "findings": [
         {
@@ -444,8 +512,13 @@ Each finding in the `findings` array:
     "ai_analysis": {
         "executive_summary": "Your server has 3 critical security issues...",
         "technical_remediation": "## Critical Actions\n\n1. **Remove .git directory**...",
-        "generated_at": "2025-10-21T20:15:35Z",
-        "model_used": "gpt-4-turbo-preview"
+        "generated_at": "2026-04-01T20:15:35Z",
+        "model_used": "gpt-4o-mini-2024-07-18",
+        "agent_analysis": "## CVE Analysis\n\nApache 2.4.54 is affected by CVE-2022-31813...",
+        "compare_results": {
+            "openai": "## OpenAI Analysis\n\nCritical: .git directory exposed...",
+            "anthropic": "## Anthropic Analysis\n\nThe most urgent finding is..."
+        }
     }
 }
 ```
@@ -461,47 +534,40 @@ Each finding in the `findings` array:
 ### Sections
 
 1. **Header**
-
     - Tool name and version
     - Target server URL
     - Scan date and mode
     - Summary badges (severity counts with icons)
 
 2. **Executive Summary** (if `--use-ai` enabled)
-
     - Non-technical business impact summary
     - Priority recommendations
     - Risk assessment
 
 3. **Technical Remediation** (if `--use-ai` enabled)
-
     - Step-by-step configuration fixes
     - Apache/Nginx config snippets
     - Command examples
 
 4. **Findings Table**
-
     - Sortable by ID, Severity, Category
     - Color-coded severity indicators
     - Expandable evidence details
     - Copy-paste recommendations
 
 5. **Server Information**
-
     - Detected server type and version
     - Supported HTTP methods
     - Security headers present/missing
     - TLS/SSL configuration summary
 
 6. **Scan Metadata**
-
     - Duration and request count
     - Rate limiting status
     - Scope limitations
     - False positive disclaimer
 
 7. **Consent Verification** (if aggressive/AI mode)
-
     - Verification method
     - Token used
     - Timestamp
@@ -513,12 +579,12 @@ Each finding in the `findings` array:
 
 ### Styling Features
 
--   **Server-themed design**: Industrial/forge aesthetic
--   **Responsive layout**: Mobile, tablet, desktop optimized
--   **Print-ready**: Clean PDF export with page breaks
--   **Syntax highlighting**: Config snippets with Prism.js
--   **Accessibility**: WCAG 2.1 AA compliant, keyboard navigation
--   **Dark mode support**: Automatic theme detection
+- **Server-themed design**: Industrial/forge aesthetic
+- **Responsive layout**: Mobile, tablet, desktop optimized
+- **Print-ready**: Clean PDF export with page breaks
+- **Syntax highlighting**: Config snippets with Prism.js
+- **Accessibility**: WCAG 2.1 AA compliant, keyboard navigation
+- **Dark mode support**: Automatic theme detection
 
 ### Example HTML Structure
 
@@ -596,11 +662,11 @@ findings = scanner.scan()
 generator = ReportGenerator()
 report = generator.create_report(
     tool='hephaestus',
-    version='0.1.0',
+    version='0.2.0',
     target='http://localhost:8080',
     mode='safe',
     findings=findings,
-    scan_duration=21.45,
+    scan_duration=31.45,
     requests_sent=142
 )
 
@@ -797,31 +863,31 @@ recommendation = "Hide server version"
 
 **Critical**: Direct credential/code exposure
 
--   Exposed .git, .env, database backups
--   Source code disclosure
--   Default credentials accessible
+- Exposed .git, .env, database backups
+- Source code disclosure
+- Default credentials accessible
 
 **High**: Version disclosure aiding exploitation
 
--   Server/Framework version in headers
--   Detailed error messages with versions
--   Debug mode enabled
+- Server/Framework version in headers
+- Detailed error messages with versions
+- Debug mode enabled
 
 **Medium**: Security best practice violations
 
--   Missing security headers
--   Directory listing enabled
--   Unnecessary HTTP methods
+- Missing security headers
+- Directory listing enabled
+- Unnecessary HTTP methods
 
 **Low**: Minor informational leaks
 
--   Informational headers present
--   Default pages accessible
+- Informational headers present
+- Default pages accessible
 
 **Info**: Detection only
 
--   Server type identified
--   Framework detected
+- Server type identified
+- Framework detected
 
 ### 4. Report Storage
 
@@ -851,10 +917,10 @@ def sanitize_evidence(value: str) -> str:
 
 Always include official documentation:
 
--   Apache: `https://httpd.apache.org/docs/2.4/`
--   Nginx: `https://nginx.org/en/docs/`
--   Security Headers: `https://securityheaders.com/`
--   OWASP: `https://owasp.org/www-project-secure-headers/`
+- Apache: `https://httpd.apache.org/docs/2.4/`
+- Nginx: `https://nginx.org/en/docs/`
+- Security Headers: `https://securityheaders.com/`
+- OWASP: `https://owasp.org/www-project-secure-headers/`
 
 ---
 
@@ -1008,16 +1074,16 @@ os.chmod(report_file, 0o600)  # Owner read/write only
 
 ### Documentation
 
--   **Hephaestus GitHub**: https://github.com/rodhnin/hephaestus-server-forger
--   **Apache Security**: https://httpd.apache.org/docs/2.4/misc/security_tips.html
--   **Nginx Security**: https://nginx.org/en/docs/http/ngx_http_ssl_module.html
--   **OWASP Secure Headers**: https://owasp.org/www-project-secure-headers/
+- **Hephaestus GitHub**: https://github.com/rodhnin/hephaestus-server-forger
+- **Apache Security**: https://httpd.apache.org/docs/2.4/misc/security_tips.html
+- **Nginx Security**: https://nginx.org/en/docs/http/ngx_http_ssl_module.html
+- **OWASP Secure Headers**: https://owasp.org/www-project-secure-headers/
 
 ### Support
 
--   **Issues**: https://github.com/rodhnin/hephaestus-server-forger/issues
--   **Discussions**: https://github.com/rodhnin/hephaestus-server-forger/discussions
+- **Issues**: https://github.com/rodhnin/hephaestus-server-forger/issues
+- **Discussions**: https://github.com/rodhnin/hephaestus-server-forger/discussions
 
-_Last Updated: November 2025_  
-_Version: 1.0_  
-_Tool: Hephaestus v0.1.0_
+_Last Updated: May 2026_
+_Version: 2.0_
+_Tool: Hephaestus v0.2.0_

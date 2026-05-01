@@ -43,6 +43,25 @@ class Config:
         "/uploads/", "/images/", "/files/", "/public/", "/assets/",
         "/static/", "/media/", "/download/", "/tmp/", "/temp/"
     ]
+
+    DEFAULT_SCAN_PORTS = [
+        # Infrastructure
+        21, 22, 25, 110, 143, 465, 587,
+        # Relational databases
+        1433, 1521, 3306, 5432,
+        # NoSQL / caches
+        5984, 6379, 11211, 27017, 27018,
+        # Search / time-series
+        9200, 9300, 8086,
+        # Message queues
+        5672, 15672,
+        # Dev / app servers
+        3000, 4000, 4200, 5000, 8000, 8080, 8443, 8888, 9000,
+        # Admin / monitoring
+        2181, 4848, 7001, 8161, 9090, 3001,
+        # Big data
+        50070,
+    ]
     
     DEFAULT_CUSTOM_HEADERS = {}
     DEFAULT_RETRY_ON_CODES = [429, 500, 502, 503, 504]
@@ -53,7 +72,7 @@ class Config:
     # ========================================================================
     
     # General
-    version: str = "0.1.0"
+    version: str = "0.2.0"
     author: str = "Rodney Dhavid Jimenez Chacin (rodhnin)"
     github: str = "https://github.com/rodhnin/hephaestus-server-forger"
     contact: str = "https://rodhnin.com"
@@ -66,11 +85,11 @@ class Config:
     
     # Scan behavior
     default_mode: str = "safe"
-    rate_limit_safe: float = 3.0
-    rate_limit_aggressive: float = 8.0
+    rate_limit_safe: float = 5.0
+    rate_limit_aggressive: float = 12.0
     timeout_connect: int = 15
     timeout_read: int = 45
-    user_agent: str = "Hephaestus/0.1.0 (Server Security Auditor; +https://github.com/rodhnin/hephaestus)"
+    user_agent: str = "Hephaestus/0.2.0 (Server Security Auditor; +https://github.com/rodhnin/hephaestus)"
     follow_redirects: bool = True
     max_redirects: int = 3
     verify_ssl: bool = True
@@ -84,6 +103,13 @@ class Config:
     check_x_powered_by: bool = True
     probe_unsafe_methods: bool = True
     
+    # Port scanning (v0.2.0)
+    port_scan_enabled: bool = True
+    port_scan_timeout: int = 3
+    port_scan_workers: int = 20
+    port_scan_cve_enabled: bool = True
+    port_scan_ports: list = field(default_factory=lambda: Config.DEFAULT_SCAN_PORTS.copy())
+
     # TLS/SSL settings (NEW for Hephaestus)
     tls_verify_certificate: bool = True
     tls_check_expiration: bool = True
@@ -118,10 +144,10 @@ class Config:
     log_colors: bool = True
     log_redact_secrets: bool = True
     
-    # AI integration (same as Argus)
+    # AI integration (same as Argus v0.2.0)
     ai_enabled: bool = False
     ai_provider: str = "openai"
-    ai_model: str = "gpt-4-turbo-preview"
+    ai_model: str = "gpt-4o-mini-2024-07-18"  # v0.2.0: cheaper default (was gpt-4-turbo-preview)
     ai_temperature: float = 0.3
     ai_max_tokens: int = 2000
     ai_agent_type: str = "zero-shot-react-description"
@@ -133,9 +159,20 @@ class Config:
     ai_remove_urls: bool = False
     ai_remove_tokens: bool = True
     ai_remove_credentials: bool = True
-    ai_remove_private_keys: bool = True  # NEW
-    ai_remove_certificates: bool = True  # NEW
+    ai_remove_private_keys: bool = True
+    ai_remove_certificates: bool = True
     ai_max_evidence_length: int = 500
+    # v0.2.0: Streaming (IMPROV-006)
+    ai_streaming: bool = False
+    # v0.2.0: Budget tracking (IMPROV-005)
+    ai_budget_enabled: bool = False
+    ai_max_cost_per_scan: float = 1.0
+    ai_warn_threshold: float = 0.8
+    ai_abort_on_exceed: bool = False
+    # v0.2.0: Agent (IMPROV-008)
+    ai_agent_max_iterations: int = 10
+    # v0.2.0: Ollama base URL
+    ai_ollama_base_url: str = "http://localhost:11434"
     
     # Advanced
     max_workers: int = 5
@@ -203,7 +240,7 @@ class Config:
         if not defaults_path.exists():
             # Return minimal defaults if file not found
             return {
-                "general": {"version": "0.1.0"},
+                "general": {"version": "0.2.0"},
                 "paths": {},
                 "scan": {},
                 "server": {},
@@ -364,6 +401,15 @@ class Config:
                 flat['check_server_header'] = detect.get('check_server_header', cls.check_server_header)
                 flat['check_x_powered_by'] = detect.get('check_x_powered_by', cls.check_x_powered_by)
         
+        # Port scan
+        if 'port_scan' in config_dict:
+            ps = config_dict['port_scan']
+            flat['port_scan_enabled'] = ps.get('enabled', cls.port_scan_enabled)
+            flat['port_scan_timeout'] = ps.get('timeout', cls.port_scan_timeout)
+            flat['port_scan_workers'] = ps.get('max_workers', cls.port_scan_workers)
+            flat['port_scan_cve_enabled'] = ps.get('cve_enrichment', cls.port_scan_cve_enabled)
+            flat['port_scan_ports'] = ps.get('ports', cls.DEFAULT_SCAN_PORTS.copy())
+
         # TLS
         if 'tls' in config_dict:
             tls = config_dict['tls']
@@ -443,6 +489,16 @@ class Config:
                 flat['ai_remove_private_keys'] = san.get('remove_private_keys', cls.ai_remove_private_keys)
                 flat['ai_remove_certificates'] = san.get('remove_certificates', cls.ai_remove_certificates)
                 flat['ai_max_evidence_length'] = san.get('max_evidence_length', cls.ai_max_evidence_length)
+            # v0.2.0: streaming, budget, agent
+            flat['ai_streaming'] = ai.get('streaming', cls.ai_streaming)
+            flat['ai_agent_max_iterations'] = ai.get('agent_max_iterations', cls.ai_agent_max_iterations)
+            flat['ai_ollama_base_url'] = ai.get('ollama_base_url', cls.ai_ollama_base_url)
+            if 'budget' in ai:
+                budget = ai['budget']
+                flat['ai_budget_enabled'] = budget.get('enabled', cls.ai_budget_enabled)
+                flat['ai_max_cost_per_scan'] = budget.get('max_cost_per_scan', cls.ai_max_cost_per_scan)
+                flat['ai_warn_threshold'] = budget.get('warn_threshold', cls.ai_warn_threshold)
+                flat['ai_abort_on_exceed'] = budget.get('abort_on_exceed', cls.ai_abort_on_exceed)
         
         # Advanced
         if 'advanced' in config_dict:

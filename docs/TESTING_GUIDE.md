@@ -136,7 +136,7 @@ source .venv/bin/activate
 
 # 3. Verify installation
 python -m heph --version
-# Output: heph 0.1.0
+# Output: heph 0.2.0
 ```
 
 ### Test 1: Basic Scan (Apache)
@@ -144,16 +144,22 @@ python -m heph --version
 ```bash
 python -m heph --target http://localhost:8080
 
-# Expected findings:
+# Expected findings across 13 scan phases:
 # - HEPH-SRV-001: Apache version disclosed (HIGH)
 # - HEPH-SRV-002: PHP version disclosed (HIGH)
 # - HEPH-FILE-001: .env file exposed (CRITICAL)
 # - HEPH-FILE-002: .git repository exposed (CRITICAL)
 # - HEPH-FILE-004: phpinfo.php accessible (CRITICAL)
+# - PHP-001 to PHP-009: Dangerous PHP settings from phpinfo() (HIGH/CRITICAL)
 # - HEPH-CFG-001: Directory listing enabled (MEDIUM)
 # - HEPH-HTTP-003: TRACE method enabled (MEDIUM)
 # - HEPH-HDR-001 to HEPH-HDR-006: Missing security headers (MEDIUM/LOW)
-# Total: ~21 findings
+# - COR-001 to COR-006: CORS misconfigurations (MEDIUM/HIGH)
+# - ROB-001 to ROB-003: Robots.txt intelligence (LOW/INFO)
+# - WAF-001/WAF-002: WAF detection (INFO)
+# - API-001 to API-005: Exposed API endpoints (HIGH/MEDIUM)
+# - COO-001 to COO-005: Cookie security issues (MEDIUM)
+# Total: ~42 findings
 ```
 
 ### Test 2: Basic Scan (Nginx)
@@ -161,27 +167,36 @@ python -m heph --target http://localhost:8080
 ```bash
 python -m heph --target http://localhost:8081
 
-# Expected findings:
+# Expected findings across 13 scan phases:
 # - HEPH-SRV-001: Nginx version disclosed (HIGH)
 # - HEPH-FILE-001: .env file exposed (CRITICAL)
 # - HEPH-FILE-002: .git repository exposed (CRITICAL)
 # - HEPH-CFG-001: Directory listing enabled (MEDIUM)
 # - HEPH-HDR-001 to HEPH-HDR-006: Missing headers (MEDIUM/LOW)
-# Total: ~13 findings
+# - COR-001: Overly permissive CORS policy (MEDIUM)
+# - ROB-001: Robots.txt sensitive path disclosure (LOW)
+# - COO-001 to COO-003: Cookie security issues (MEDIUM)
+# Total: ~25 findings
 ```
 
 ### Test 3: Verbose Output
 
 ```bash
-# See detailed scan progress
+# See detailed scan progress (13 phases, ~30-35 seconds)
 python -m heph --target http://localhost:8080 -vv
 
 # Expected:
-# [DEBUG] Checking server information...
+# [DEBUG] Phase 1/13: Server information...
 # [DEBUG] Found: Apache/2.4.54
-# [DEBUG] Checking sensitive files...
+# [DEBUG] Phase 2/13: Sensitive files...
 # [DEBUG] Found: .env (200 OK)
 # [DEBUG] Found: .git/HEAD (200 OK)
+# [DEBUG] Phase 8/13: CORS detection...
+# [DEBUG] Phase 9/13: Robots.txt intelligence...
+# [DEBUG] Phase 10/13: WAF detection...
+# [DEBUG] Phase 11/13: API discovery...
+# [DEBUG] Phase 12/13: Cookie security...
+# [DEBUG] Phase 13/13: phpinfo() analysis...
 # ...
 ```
 
@@ -252,16 +267,16 @@ jq '{tool, version, target, summary, findings: (.findings | length)}' "$LAST_REP
 # Expected:
 # {
 #   "tool": "hephaestus",
-#   "version": "0.1.0",
+#   "version": "0.2.0",
 #   "target": "http://localhost:8080",
 #   "summary": {
-#     "critical": 6,
-#     "high": 2,
-#     "medium": 8,
-#     "low": 5,
-#     "info": 0
+#     "critical": 8,
+#     "high": 7,
+#     "medium": 17,
+#     "low": 7,
+#     "info": 3
 #   },
-#   "findings": 21
+#   "findings": 42
 # }
 ```
 
@@ -325,7 +340,7 @@ python -m heph --verify-consent http \
 python -m heph --target http://localhost:8080 --aggressive -v
 
 # Expected:
-# - Higher rate limit (8 req/s instead of 3)
+# - Higher rate limit (12 req/s instead of 5)
 # - More detailed checks
 # - Same findings (lab already exposes everything)
 ```
@@ -418,6 +433,111 @@ python -m heph --target http://localhost:8080 --use-ai --html
 # Expected: 28 minutes on CPU, 75 seconds on GPU
 ```
 
+### Test 18: AI Streaming (`--ai-stream`)
+
+```bash
+# Stream AI tokens as they are generated
+python -m heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-stream \
+  --ai-tone technical \
+  -v
+
+# Expected: tokens printed token-by-token as they arrive from the model
+# Useful for seeing progress on long analyses
+```
+
+### Test 19: AI Provider Comparison (`--ai-compare`)
+
+```bash
+# Compare two providers in parallel
+python -m heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-compare openai,anthropic \
+  --html
+
+# Compare with explicit model versions
+python -m heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-compare openai:gpt-4o-mini-2024-07-18,anthropic:claude-3-5-haiku-20241022 \
+  --html
+
+# Expected in HTML: side-by-side tab with both analyses
+```
+
+### Test 20: AI Agent Mode (`--ai-agent`)
+
+```bash
+# Agent mode with live NVD CVE lookup
+python -m heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-agent \
+  --html \
+  -v
+
+# Expected: AI looks up CVEs for detected server versions via NVD API v2
+# Agent findings section added to HTML and JSON reports
+```
+
+### Test 21: AI Budget Cap (`--ai-budget`)
+
+```bash
+# Set a cost cap in USD
+python -m heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-budget 0.50 \
+  --ai-tone both \
+  -v
+
+# Expected: scan stops AI analysis if cost would exceed $0.50
+# Cost tracked in ~/.argos/costs.json
+```
+
+### Test 22: Diff Reports (`--diff`)
+
+```bash
+# Run first scan
+python -m heph --target http://localhost:8080
+
+# Make a change in the lab (fix one vulnerability)
+docker exec hephaestus-vulnerable-apache rm /var/www/html/.env
+
+# Run second scan
+python -m heph --target http://localhost:8080
+
+# Diff against last scan
+python -m heph --target http://localhost:8080 --diff last
+
+# Expected diff output:
+# RESOLVED (1): HEPH-FILE-001 .env file exposed
+# NEW (0)
+# UNCHANGED (41)
+
+# Diff against specific scan ID
+python -m heph --target http://localhost:8080 --diff 84
+```
+
+### Test 23: Offline Config File Parser (`--config-file`)
+
+```bash
+# Export config from container for offline analysis
+docker exec hephaestus-vulnerable-apache \
+  cat /etc/apache2/apache2.conf > /tmp/apache2.conf
+
+# Analyze offline (no HTTP requests)
+python -m heph --config-file /tmp/apache2.conf
+
+# Nginx equivalent
+docker exec hephaestus-vulnerable-nginx \
+  cat /etc/nginx/nginx.conf > /tmp/nginx.conf
+python -m heph --config-file /tmp/nginx.conf
+
+# Expected findings from config analysis:
+# - ServerTokens Full detected (HIGH)
+# - Autoindex on detected (MEDIUM)
+# - Dangerous PHP settings detected (if php.ini parsed)
+```
+
 ---
 
 ## 🧪 Test Cases & Expected Results
@@ -454,26 +574,51 @@ python -m heph --target http://localhost:8080 --use-ai --html
 | **Nginx Specific**             |
 | Nginx version                  | http://localhost:8081               | HIGH         | HEPH-SRV-001  | ✅             |
 | Nginx .env                     | http://localhost:8081/.env          | **CRITICAL** | HEPH-FILE-001 | ✅             |
+| **CORS (Phase 8)**             |
+| Wildcard CORS origin           | http://localhost:8080               | HIGH         | COR-001       | ✅             |
+| Credentials + wildcard CORS    | http://localhost:8080               | **CRITICAL** | COR-002       | ✅             |
+| CORS allows null origin        | http://localhost:8080               | MEDIUM       | COR-003       | ✅             |
+| **Robots.txt (Phase 9)**       |
+| Sensitive paths in robots.txt  | http://localhost:8080/robots.txt    | LOW          | ROB-001       | ✅             |
+| Admin paths exposed            | http://localhost:8080/robots.txt    | MEDIUM       | ROB-002       | ✅             |
+| **WAF Detection (Phase 10)**   |
+| No WAF detected                | http://localhost:8080               | INFO         | WAF-001       | ✅             |
+| WAF identified                 | http://localhost:8080               | INFO         | WAF-002       | ✅             |
+| **API Discovery (Phase 11)**   |
+| Swagger UI exposed             | http://localhost:8080/swagger-ui    | HIGH         | API-001       | ✅             |
+| OpenAPI spec exposed           | http://localhost:8080/openapi.json  | HIGH         | API-002       | ✅             |
+| GraphQL endpoint exposed       | http://localhost:8080/graphql       | MEDIUM       | API-003       | ✅             |
+| **Cookie Security (Phase 12)** |
+| Missing Secure flag            | http://localhost:8080               | MEDIUM       | COO-001       | ✅             |
+| Missing HttpOnly flag          | http://localhost:8080               | MEDIUM       | COO-002       | ✅             |
+| Missing SameSite attribute     | http://localhost:8080               | MEDIUM       | COO-003       | ✅             |
+| Weak cookie name pattern       | http://localhost:8080               | LOW          | COO-004       | ✅             |
+| **phpinfo() Analysis (Phase 13)** |
+| expose_php On                  | http://localhost:8080/phpinfo.php   | HIGH         | PHP-001       | ✅             |
+| display_errors On              | http://localhost:8080/phpinfo.php   | HIGH         | PHP-002       | ✅             |
+| allow_url_fopen On             | http://localhost:8080/phpinfo.php   | HIGH         | PHP-003       | ✅             |
+| register_globals On            | http://localhost:8080/phpinfo.php   | **CRITICAL** | PHP-004       | ✅             |
+| Dangerous PHP extensions       | http://localhost:8080/phpinfo.php   | MEDIUM       | PHP-005       | ✅             |
 
 ### Expected Finding Counts
 
 #### Apache Lab (localhost:8080)
 
--   **CRITICAL**: 3-6 findings (.env, .git/HEAD, .git/config, phpinfo.php, server-status)
--   **HIGH**: 2-3 findings (version disclosure, weak TLS)
--   **MEDIUM**: 7-9 findings (headers, TRACE, directory listing, error page)
--   **LOW**: 3-5 findings (headers, HTTP methods)
--   **INFO**: 0-2 findings
--   **TOTAL**: 15-25 findings
+-   **CRITICAL**: 6-10 findings (.env, .git/HEAD, .git/config, phpinfo.php, register_globals, CORS+credentials)
+-   **HIGH**: 6-8 findings (version disclosure, weak TLS, PHP settings, CORS wildcard, API exposure)
+-   **MEDIUM**: 15-18 findings (headers, TRACE, directory listing, cookie flags, CORS, WAF, API)
+-   **LOW**: 6-8 findings (headers, HTTP methods, robots.txt)
+-   **INFO**: 2-4 findings (WAF, port scan)
+-   **TOTAL**: 35-50 findings (~42 typical)
 
 #### Nginx Lab (localhost:8081)
 
 -   **CRITICAL**: 2-3 findings (.env, .git files)
--   **HIGH**: 2 findings (version, TLS)
--   **MEDIUM**: 4-6 findings (headers, directory listing)
--   **LOW**: 3-4 findings (headers)
--   **INFO**: 0-1 findings
--   **TOTAL**: 11-16 findings
+-   **HIGH**: 2-3 findings (version, TLS)
+-   **MEDIUM**: 10-13 findings (headers, directory listing, cookie flags, CORS)
+-   **LOW**: 4-6 findings (headers, robots.txt)
+-   **INFO**: 1-2 findings (WAF detection)
+-   **TOTAL**: 20-30 findings (~25 typical)
 
 ---
 
@@ -490,7 +635,16 @@ python -m heph --target http://localhost:8080 --use-ai --html
 -   [ ] Database persistence works (scans stored in `~/.argos/argos.db`)
 -   [ ] Consent system blocks aggressive mode without verification
 -   [ ] AI analysis completes without errors (if API key provided)
--   [ ] Rate limiting works (3 req/s safe, 8 req/s aggressive)
+-   [ ] Rate limiting works (5 req/s safe, 12 req/s aggressive)
+-   [ ] All 13 scan phases execute and produce findings
+-   [ ] CORS, Robots.txt, WAF, API, Cookie, phpinfo phases report correctly
+-   [ ] OWASP Top 10 2021 mapping present on every finding
+-   [ ] Diff report (`--diff last`) shows resolved/new/unchanged counts
+-   [ ] Config file parser (`--config-file`) works offline without HTTP requests
+-   [ ] AI budget cap (`--ai-budget`) stops analysis when threshold reached
+-   [ ] AI streaming (`--ai-stream`) outputs tokens progressively
+-   [ ] AI compare (`--ai-compare`) runs both providers and shows results
+-   [ ] AI agent (`--ai-agent`) performs NVD CVE lookup
 
 ### ❌ Fail Conditions
 
@@ -537,13 +691,13 @@ echo "3. Verifying findings..."
 APACHE_FINDINGS=$(jq '.findings | length' ~/.hephaestus/reports/hephaestus_report_localhost_8080_*.json | tail -1)
 NGINX_FINDINGS=$(jq '.findings | length' ~/.hephaestus/reports/hephaestus_report_localhost_8081_*.json | tail -1)
 
-if [ "$APACHE_FINDINGS" -lt 15 ]; then
-    echo "❌ FAIL: Apache findings too low ($APACHE_FINDINGS < 15)"
+if [ "$APACHE_FINDINGS" -lt 35 ]; then
+    echo "❌ FAIL: Apache findings too low ($APACHE_FINDINGS < 35)"
     exit 1
 fi
 
-if [ "$NGINX_FINDINGS" -lt 10 ]; then
-    echo "❌ FAIL: Nginx findings too low ($NGINX_FINDINGS < 10)"
+if [ "$NGINX_FINDINGS" -lt 20 ]; then
+    echo "❌ FAIL: Nginx findings too low ($NGINX_FINDINGS < 20)"
     exit 1
 fi
 
@@ -711,12 +865,34 @@ Before deploying Hephaestus or reporting issues:
 -   [ ] Aggressive mode blocked without consent
 -   [ ] Aggressive mode works with consent
 
+**New v0.2.0 Phases:**
+
+-   [ ] Phase 8 (CORS): Wildcard and credentialed CORS misconfigurations detected
+-   [ ] Phase 9 (Robots.txt): Sensitive paths extracted from robots.txt
+-   [ ] Phase 10 (WAF): WAF signatures checked (13 WAF signatures)
+-   [ ] Phase 11 (API): Swagger/OpenAPI and GraphQL endpoints discovered
+-   [ ] Phase 12 (Cookie): Per-cookie Secure/HttpOnly/SameSite flags checked
+-   [ ] Phase 13 (phpinfo): 9 dangerous PHP settings extracted
+
+**New v0.2.0 CLI Features:**
+
+-   [ ] `--diff last` shows resolved/new/unchanged findings
+-   [ ] `--diff SCAN_ID` diffs against specific previous scan
+-   [ ] `--config-file PATH` parses httpd.conf/nginx.conf offline
+-   [ ] `--ai-stream` prints AI tokens progressively
+-   [ ] `--ai-compare PROVIDERS` runs parallel provider comparison
+-   [ ] `--ai-agent` performs NVD CVE lookup via NVD API v2
+-   [ ] `--ai-budget USD` stops AI analysis at cost threshold
+
 **AI Features (Optional):**
 
 -   [ ] AI analysis completes (OpenAI/Anthropic/Ollama)
 -   [ ] Technical report generated
 -   [ ] Executive summary generated
 -   [ ] AI sections in HTML report
+-   [ ] AI costs recorded in `~/.argos/costs.json`
+-   [ ] Budget cap respected (`--ai-budget`)
+-   [ ] Streaming output works (`--ai-stream`)
 
 **Error Handling:**
 

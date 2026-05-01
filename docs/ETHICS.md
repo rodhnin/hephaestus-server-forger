@@ -105,12 +105,12 @@ Most countries have similar laws:
     -   No exploit attempts
     -   No file modifications
     -   No login attempts
-    -   Rate limited to 3 req/s (respectful)
+    -   Rate limited to 5 req/s (respectful)
 
 -   **Aggressive mode**: `--aggressive` (deeper probing)
     -   **Requires verified consent token**
-    -   Extended file checks (400+ paths)
-    -   Higher rate limit (8 req/s)
+    -   Extended file checks (70+ sensitive file paths)
+    -   Higher rate limit (12 req/s)
     -   More comprehensive testing
 
 ### 2. Consent Token Verification System
@@ -657,5 +657,5 @@ This software is provided for **authorized security testing only**. By using Hep
 
 **USE AT YOUR OWN RISK. YOU HAVE BEEN WARNED.**
 
-_Version: 1.0_  
-_Applies to: Hephaestus v0.1.0 and later_
+_Version: 1.0_
+_Applies to: Hephaestus v0.2.0 and later_

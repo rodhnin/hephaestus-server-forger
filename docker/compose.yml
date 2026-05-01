@@ -19,7 +19,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: hephaestus:0.1.0
+    image: hephaestus:0.2.0
     container_name: hephaestus-scanner
     restart: unless-stopped
     user: "1000:1000"  # Run as non-root user
@@ -58,7 +58,7 @@ services:
     labels:
       - "com.hephaestus.service=scanner"
       - "com.hephaestus.environment=production"
-      - "com.hephaestus.version=0.1.0"
+      - "com.hephaestus.version=0.2.0"
 
 networks:
   hephaestus-prod:

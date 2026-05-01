@@ -149,8 +149,25 @@ class SensitiveFilesChecker:
                 f"possible connection issues, but continuing with {successful_requests} successful checks"
             )
         
-        logger.info(f"Found {len(findings)} sensitive files exposed")
-        return findings
+        # Deduplicate findings with the same ID (e.g., multiple .git/* accessible)
+        # Merge evidence URLs into the first occurrence of each ID
+        seen: Dict[str, Dict] = {}
+        deduped: List[Dict[str, Any]] = []
+        for finding in findings:
+            fid = finding['id']
+            if fid not in seen:
+                seen[fid] = finding
+                deduped.append(finding)
+            else:
+                # Append additional URL to existing finding's evidence
+                existing = seen[fid]
+                new_url = finding['evidence'].get('value', '')
+                existing_val = existing['evidence'].get('value', '')
+                if new_url and new_url not in existing_val:
+                    existing['evidence']['value'] = existing_val + '\n' + new_url
+
+        logger.info(f"Found {len(deduped)} sensitive files exposed")
+        return deduped
     
     def _check_file(self, target: str, path: str) -> Optional[Dict[str, Any]]:
         """
@@ -506,7 +523,8 @@ class SensitiveFilesChecker:
                     f"2. Move outside web root\n"
                     f"3. Block via .htaccess or Nginx config"
                 ),
-                'affected_component': path
+                'affected_component': path,
+                'owasp': {'id': 'A05', 'name': 'Security Misconfiguration'},
             }
     
     def _create_forbidden_finding(self, path: str, url: str) -> Dict[str, Any]:
@@ -530,7 +548,8 @@ class SensitiveFilesChecker:
                 f"- Files blocked by web server could still be accessible via other means\n"
                 f"- Best practice: delete sensitive files from web root"
             ),
-            'affected_component': path
+            'affected_component': path,
+            'owasp': {'id': 'A05', 'name': 'Security Misconfiguration'},
         }
     
     def _get_severity(self, path: str) -> str:

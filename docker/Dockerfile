@@ -3,15 +3,15 @@
 # 
 # Multi-stage build for minimal production image
 # Usage:
-#   docker build -f docker/Dockerfile -t hephaestus:0.1.0 .
-#   docker run --rm hephaestus:0.1.0 --target https://example.com
+#   docker build -f docker/Dockerfile -t hephaestus:0.2.0 .
+#   docker run --rm hephaestus:0.2.0 --target https://example.com
 # ============================================================================
 
 FROM python:3.11-slim as builder
 
 LABEL maintainer="Rodney Dhavid Jimenez Chacin <https://rodhnin.com>"
 LABEL description="Hephaestus - Server Security Auditor"
-LABEL version="0.1.0"
+LABEL version="0.2.0"
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -56,6 +56,7 @@ COPY config/ /app/config/
 COPY templates/ /app/templates/
 COPY db/ /app/db/
 COPY assets/ /app/assets/
+COPY schema/ /app/schema/
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /reports /data && \
@@ -82,27 +83,27 @@ CMD ["--help"]
 
 # ============================================================================
 # Build instructions:
-#   docker build -f docker/Dockerfile -t hephaestus:0.1.0 .
+#   docker build -f docker/Dockerfile -t hephaestus:0.2.0 .
 #
 # Run examples:
 #   # Basic scan
-#   docker run --rm -v $(pwd)/reports:/reports hephaestus:0.1.0 \
+#   docker run --rm -v $(pwd)/reports:/reports hephaestus:0.2.0 \
 #     --target https://example.com
 #
 #   # With HTML report
-#   docker run --rm -v $(pwd)/reports:/reports hephaestus:0.1.0 \
+#   docker run --rm -v $(pwd)/reports:/reports hephaestus:0.2.0 \
 #     --target https://example.com --html
 #
 #   # With AI analysis (requires API key)
 #   docker run --rm -v $(pwd)/reports:/reports \
 #     -e OPENAI_API_KEY="sk-..." \
-#     hephaestus:0.1.0 \
+#     hephaestus:0.2.0 \
 #     --target https://example.com --use-ai --html
 #
 #   # Persist database across runs
 #   docker run --rm \
 #     -v $(pwd)/reports:/reports \
 #     -v $(pwd)/data:/data \
-#     hephaestus:0.1.0 \
+#     hephaestus:0.2.0 \
 #     --target https://example.com
 # ============================================================================

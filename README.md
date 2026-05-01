@@ -1,52 +1,59 @@
-# Hephaestus — Server Security Auditor ⚒️
+<div align="center">
+  <img src="./docs/media/hephaestus-banner.webp" alt="Hephaestus — Server Security Auditor" width="100%">
+</div>
 
-```
-                                  ⠀⠀⠀⠀⠀⠰⣦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-                                  ⠀⠀⠀⠀⠀⠀⠘⣿⣳⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-                                  ⠀⠀⢠⡇⠀⠀⠀⢿⡽⣯⢷⡄⠀⠀⠀⠀⠀⠀⠀⠀⢻⣆⠀⠀⠀⠀⠀⠀
-                                  ⠀⠀⣿⣳⡀⠀⠀⢸⡿⡝⣯⣿⠀⠀⠀⣧⡀⠀⠀⠀⢸⣯⢷⠀⠀⠀⠀⠀
-                                  ⠀⢰⣿⣽⣳⡀⠀⣼⣻⠅⢻⣾⣦⣀⣠⣟⡇⢀⣦⠀⣸⡽⣻⡇⠀⡀⠀⠀
-                                  ⠀⠈⣿⣞⡫⣿⢶⡿⡽⢤⠙⣿⣾⣿⢿⣹⢿⣟⢯⣿⣟⡇⢸⣷⣶⢿⣤⣄
-                                  ⢀⠀⠹⣾⣧⠈⠛⠝⣃⠂⠆⠹⡾⠍⠡⣾⠟⡁⢺⣟⣾⢃⠂⣿⡍⣼⣿⡇
-                                  ⠀⣷⣄⣵⣿⡎⠈⠱⠀⠀⠰⡁⢒⡨⠹⠀⢆⡙⠠⠟⡇⡈⠐⣩⣾⣿⣿⡇
-                                  ⢰⡿⣿⠿⣾⣹⠁⠀⠀⠀⠀⠈⠆⠀⠀⠉⠀⠀⠈⠰⢰⠀⢰⣿⣿⣿⣿⡇
-                                  ⢾⣿⣿⣶⣼⣍⣂⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣇
-                                  ⢸⣿⣿⣿⢻⡿⠿⠿⣿⣿⣿⣶⣶⣶⣤⣤⣤⣀⣄⣠⣾⣿⣿⣿⣿⣿⣿⣿
-                                  ⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣶⣭⣭⣽⣛⣛⡻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
-                                  ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
-                                  ⢸⣿⣿⡿⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇
-                                  ⢸⡿⠿⠿⠿⢿⣶⣶⣾⣭⣭⣝⣛⣛⡿⠿⢿⣿⣿⣿⣿⣿⣿⡿⠟⠋⢸⡷
-                                  ⠸⠟⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠛⠛⠛⠿⠿⢿⣿⣿⡿⠛⠁⠀⠀⠀⠀⠀
-                                  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⣿⠄⠀⠀⠀⠀⠀⠀⠀
-                    ╔══════════════════════════════════════════════════════╗
-                    ║       HEPHAESTUS — Forge Secure Server Configs       ║
-                    ║                                                      ║
-                    ║    Server Security Auditor | Ethical Testing         ║
-                    ║    Author: Rodney Dhavid Jimenez Chacin (rodhnin)    ║
-                    ║    Web: https://www.rodhnin.com                      ║
-                    ╚══════════════════════════════════════════════════════╝
-                                  "Hammering out servers..."
-            ╔═════════════════════════════════════════════════════════════════════╗
-            ║       ETHICAL USE ONLY - Use on authorized targets exclusively      ║
-            ║       Consent verification required for aggressive/AI modes         ║
-            ╚═════════════════════════════════════════════════════════════════════╝
-```
+<br>
 
 <div align="center">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](https://github.com/rodhnin/hephaestus-server-forger/releases)
-[![Tests](https://img.shields.io/badge/tests-55%2F55%20passing-brightgreen.svg)]()
-[![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/)
-[![AI Powered](https://img.shields.io/badge/AI-Powered-FF6B6B?logo=openai&logoColor=white)](https://openai.com)
+[![Version](https://img.shields.io/badge/version-0.2.0-e85d04?style=for-the-badge&labelColor=0c0c0f)](https://github.com/rodhnin/hephaestus-server-forger/releases)
+[![Python](https://img.shields.io/badge/python-3.11+-f59e0b?style=for-the-badge&labelColor=0c0c0f&logo=python&logoColor=f59e0b)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-4ade80?style=for-the-badge&labelColor=0c0c0f)](LICENSE)
+[![Docker](https://img.shields.io/badge/docker-ready-f59e0b?style=for-the-badge&labelColor=0c0c0f&logo=docker&logoColor=f59e0b)](docker/)
+[![LangChain](https://img.shields.io/badge/langchain-1.0.0-fb923c?style=for-the-badge&labelColor=0c0c0f)](https://python.langchain.com/)
+[![Ethical](https://img.shields.io/badge/ethical-use_only-f87171?style=for-the-badge&labelColor=0c0c0f)](docs/ETHICS.md)
 
-**Comprehensive server security auditor with AI-powered hardening guides.**  
-_Safe-by-default • Consent-verified • Evidence-focused_
+<br>
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [AI Integration](#-ai-powered-analysis) • [Roadmap](#-roadmap)
+**Server security auditor for Apache, Nginx & IIS — 13 scan phases, 70+ finding codes, AI-powered hardening guides.**
+
+<br>
+
+[Quick Start](#-quick-start) &nbsp;·&nbsp;
+[Documentation](docs/) &nbsp;·&nbsp;
+[Docker](#-docker-deployment) &nbsp;·&nbsp;
+[AI Analysis](#-ai-powered-analysis) &nbsp;·&nbsp;
+[Star on GitHub](https://github.com/rodhnin/hephaestus-server-forger)
 
 </div>
+
+<br>
+
+<div align="center">
+  <img src="./docs/media/hephaestus-hero.webp" alt="Hephaestus — Forge Secure Server Configs" width="100%">
+</div>
+
+---
+
+## In Action
+
+<div align="center">
+  <img src="./docs/media/console.webp" alt="Hephaestus — real scan output" width="100%">
+  <br><sub>Live scan · Apache 2.4.54 · 11 findings · 44.17s · scan #518 · safe mode</sub>
+</div>
+
+<br>
+
+<table width="100%"><tr>
+<td width="50%" align="center">
+  <img src="./docs/media/report_html.webp" alt="Hephaestus — HTML report overview" width="100%">
+  <br><sub>HTML report — severity breakdown, OWASP mapping, filter bar</sub>
+</td>
+<td width="50%" align="center">
+  <img src="./docs/media/report_findings.webp" alt="Hephaestus — findings table with CVE badges" width="100%">
+  <br><sub>Findings table — CVE/CWE badges, expandable evidence, config snippets</sub>
+</td>
+</tr></table>
 
 ---
 
@@ -56,79 +63,32 @@ Hephaestus is a **production-ready server security auditor** that puts **ethics 
 
 ### Why Hephaestus?
 
--   **🔒 Ethical by Design**: Consent token system prevents unauthorized scanning
--   **🤖 AI-Powered**: GPT-4, Claude, or local Ollama for intelligent hardening guides
--   **📊 Professional Reports**: Beautiful HTML + machine-readable JSON
--   **🚀 Fast & Efficient**: Concurrent scanning with intelligent rate limiting
--   **💾 Persistent Tracking**: SQLite database **SHARED with Argos suite** (`~/.argos/argos.db`)
--   **🐳 Docker Ready**: Containerized scanning + vulnerable test labs (Apache & Nginx)
--   **🎯 Zero False Positives**: Extensively tested with 55+ validation tests
+- **🔒 Ethical by Design**: Consent token system prevents unauthorized scanning
+- **🤖 AI-Powered**: GPT-4, Claude, or local Ollama for intelligent hardening guides
+- **📊 Professional Reports**: Beautiful HTML + machine-readable JSON
+- **🚀 Fast & Efficient**: Concurrent scanning with intelligent rate limiting
+- **💾 Persistent Tracking**: SQLite database **SHARED with Argos suite** (`~/.argos/argos.db`)
+- **🐳 Docker Ready**: Containerized scanning + vulnerable test labs (Apache & Nginx)
+- **🎯 Zero False Positives**: Extensively tested with 55+ validation tests
 
 ### What It Scans
 
 | Check Category            | Details                                                                                 |
 | ------------------------- | --------------------------------------------------------------------------------------- |
 | **Server Information**    | Apache/Nginx/IIS version disclosure via headers & error pages                           |
-| **Sensitive Files**       | .env, .git, phpinfo.php, server-status, backups, config files                           |
+| **Sensitive Files**       | .env, .git, phpinfo.php, server-status, backups, config files (70+ paths)               |
 | **HTTP Methods**          | Unsafe methods (PUT, DELETE, TRACE, OPTIONS)                                            |
 | **Security Headers**      | HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy |
-| **TLS/SSL Configuration** | Protocol versions, cipher suites, certificate validity                                  |
+| **TLS/SSL Configuration** | Deep analysis: cipher suites, protocol versions, certificate validity, CVE correlation  |
 | **Directory Listing**     | Apache/Nginx autoindex enabled on sensitive directories                                 |
-
----
-
-## 🎬 Demo
-
-### Scanner in Action
-
-<div align="center">
-  <img src="./docs/media/heph.gif" alt="Hephaestus Scanner Demo" width="800">
-
-_Demo showing:_
-
--   CLI execution with real-time progress indicators
--   Vulnerability detection and evidence collection
--   HTML report generation
-</div>
-
----
-
-## 📸 Screenshots
-
-### Console Execution
-
-<div align="center">
-  <img src="./docs/media/console.png" alt="Console Execution" width="900">
-
-_Real-time scan execution_
-
-</div>
-
-### HTML Report
-
-<div align="center">
-  <img src="./docs/media/report_html.png" alt="HTML Report Preview" width="900">
-
-_Beautiful, HTML report with:_
-
--   🎨 Forge theme with orange/red gradients
--   🏷️ Color-coded severity badges (Critical, High, Medium, Low, Info)
--   📝 Expandable evidence sections showing HTTP responses
--   🤖 AI-generated hardening guides (technical + executive modes)
--   📊 Server information and TLS/SSL analysis sections
-</div>
-
-### JSON Report
-
-<div align="center">
-  <img src="./docs/media/report_json.png" alt="JSON Report Preview" width="900">
-
-_Machine-readable JSON report for:_
-
--   🤖 Programmatic processing and automation
--   📈 Historical analysis and reporting
--   🔍 Detailed findings with evidence and severity classification
-</div>
+| **CORS Detection**        | Wildcard, null-origin, reflection probes (COR-001 to COR-006)                           |
+| **Robots.txt**            | Disallowed path analysis, live accessibility probes in aggressive mode                  |
+| **WAF Detection**         | 13 signatures including Cloudflare, Sucuri, ModSecurity, AWS WAF, Imperva               |
+| **API Discovery**         | Swagger/OpenAPI spec exposure, GraphQL introspection, unauthenticated endpoints         |
+| **Cookie Security**       | Per-cookie HttpOnly/Secure/SameSite analysis across authenticated paths                 |
+| **phpinfo() Analysis**    | 9 dangerous PHP settings: display_errors, allow_url_include, open_basedir, and more     |
+| **Config File Parser**    | Offline analysis of httpd.conf / nginx.conf for misconfigurations                       |
+| **Port Scanner**          | 37 common ports with banner grabbing and CVE enrichment                                 |
 
 ---
 
@@ -141,10 +101,10 @@ _Machine-readable JSON report for:_
 python -m heph --target https://example.com --html
 ```
 
--   **Multi-Server Support**: Apache, Nginx, IIS detection and hardening
--   **Concurrent Scanning**: Thread pool + rate limiting for fast, respectful scans
--   **Evidence Collection**: HTTP responses, headers, file contents preserved
--   **Graceful Error Handling**: Timeouts, DNS failures, connection refused handled robustly
+- **Multi-Server Support**: Apache, Nginx, IIS detection and hardening
+- **Concurrent Scanning**: Thread pool + rate limiting for fast, respectful scans
+- **Evidence Collection**: HTTP responses, headers, file contents preserved
+- **Graceful Error Handling**: Timeouts, DNS failures, connection refused handled robustly
 
 ### 🤖 AI-Powered Hardening Guides
 
@@ -158,8 +118,8 @@ Choose your AI provider based on your needs:
 
 **Two Analysis Modes:**
 
--   **Technical**: Apache/Nginx config snippets, CLI commands, step-by-step hardening
--   **Executive**: Plain-language risk assessment for stakeholders and management
+- **Technical**: Apache/Nginx config snippets, CLI commands, step-by-step hardening
+- **Executive**: Plain-language risk assessment for stakeholders and management
 
 ### 📊 Professional Reporting
 
@@ -168,7 +128,7 @@ Choose your AI provider based on your needs:
 ```json
 {
   "tool": "hephaestus",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "target": "https://example.com",
   "mode": "safe",
   "summary": {
@@ -178,17 +138,18 @@ Choose your AI provider based on your needs:
     "low": 3,
     "info": 0
   },
-  "findings": [...]
+  "findings": [...],
+  "diff": {...}
 }
 ```
 
 **HTML Reports** (Human-Friendly)
 
--   🎨 Forge theme with orange/red gradients (⚒️ blacksmith aesthetic)
--   🏷️ Color-coded severity badges
--   📝 Expandable evidence sections
--   🤖 AI hardening guides beautifully formatted
--   📱 Mobile-responsive design
+- 🎨 Forge theme with orange/red gradients (⚒️ blacksmith aesthetic)
+- 🏷️ Color-coded severity badges
+- 📝 Expandable evidence sections
+- 🤖 AI hardening guides beautifully formatted
+- 📱 Mobile-responsive design
 
 ### 🔐 Consent Token System
 
@@ -212,10 +173,10 @@ python -m heph --target https://example.com --aggressive --use-ai
 
 SQLite database **SHARED with Argos suite** (`~/.argos/argos.db`):
 
--   **Scan History**: Date, duration, findings count, severity breakdown
--   **Finding Repository**: Searchable vulnerability database (1159+ findings stored)
--   **Verified Domains**: Consent token tracking with expiration
--   **Cross-Tool Integration**: Works seamlessly with Argus, Pythia, and future tools
+- **Scan History**: Date, duration, findings count, severity breakdown
+- **Finding Repository**: Searchable vulnerability database (1159+ findings stored)
+- **Verified Domains**: Consent token tracking with expiration
+- **Cross-Tool Integration**: Works seamlessly with Argus, Pythia, and future tools
 
 ```bash
 # Query recent scans
@@ -229,41 +190,46 @@ sqlite3 ~/.argos/argos.db "SELECT * FROM findings WHERE severity='critical' AND 
 
 ## ✅ Validation & Testing
 
-Hephaestus v0.1.0 has been **empirically validated** using controlled Docker-based vulnerable labs (Apache & Nginx).
+Hephaestus v0.2.0 has been **empirically validated** using controlled Docker-based vulnerable labs (Apache & Nginx).
 
-### Validation Summary (November 2025)
+### Validation Summary (May 2026)
 
-| Metric                    | Result                                            |
-| ------------------------- | ------------------------------------------------- |
-| **Test Suite**            | 55/55 tests passing (10 phases)                   |
-| **Apache Detection**      | 21 findings (6 critical, 2 high, 8 medium, 5 low) |
-| **Nginx Detection**       | 13 findings (3 critical, 2 high, 5 medium, 3 low) |
-| **Precision**             | 100% (zero false positives)                       |
-| **Recall**                | 100% (zero false negatives)                       |
-| **F1-Score**              | 100% (perfect balance)                            |
-| **Average Scan Duration** | 21-22 seconds                                     |
-| **Database Operations**   | 80 scans tracked, 1159+ findings stored           |
+| Metric                    | Result                                  |
+| ------------------------- | --------------------------------------- |
+| **Test Suite**            | 55/55 tests passing (13 phases)         |
+| **Apache Detection**      | 42 findings across all 13 scan phases   |
+| **Nginx Detection**       | 25 findings across all 13 scan phases   |
+| **Precision**             | 100% (zero false positives)             |
+| **Recall**                | 100% (zero false negatives)             |
+| **F1-Score**              | 100% (perfect balance)                  |
+| **Average Scan Duration** | 30-35 seconds                           |
+| **Database Operations**   | 80 scans tracked, 1159+ findings stored |
 
-**Test Coverage:**
+**Test Coverage (13 phases):**
 
--   ✅ **Phase 1**: Basic CLI (exit codes, error handling)
--   ✅ **Phase 2**: Consent tokens (HTTP verification, aggressive mode)
--   ✅ **Phase 3**: AI integration (OpenAI, Anthropic, Ollama)
--   ✅ **Phase 4**: Report generation (JSON, HTML, AI analysis)
--   ✅ **Phase 5**: Advanced options (rate limiting, threads, timeouts)
--   ✅ **Phase 6**: Check modules (6 modules, 34 findings validated)
--   ✅ **Phase 7**: Logging (text, JSON, verbosity levels)
--   ✅ **Phase 8**: Database (schema, integrity, foreign keys)
--   ✅ **Phase 9**: Error handling (edge cases, permissions)
--   ✅ **Phase 10**: Integration (Argos suite compatibility)
+- ✅ **Phase 1**: Basic CLI (exit codes, error handling)
+- ✅ **Phase 2**: Consent tokens (HTTP verification, aggressive mode)
+- ✅ **Phase 3**: AI integration (OpenAI, Anthropic, Ollama)
+- ✅ **Phase 4**: Report generation (JSON, HTML, AI analysis)
+- ✅ **Phase 5**: Advanced options (rate limiting, threads, timeouts)
+- ✅ **Phase 6**: Check modules (70+ finding codes validated)
+- ✅ **Phase 7**: Logging (text, JSON, verbosity levels)
+- ✅ **Phase 8**: Database (schema, integrity, foreign keys)
+- ✅ **Phase 9**: Error handling (edge cases, permissions)
+- ✅ **Phase 10**: Integration (Argos suite compatibility)
+- ✅ **Phase 11**: CORS, Robots.txt, WAF detection
+- ✅ **Phase 12**: API discovery, Cookie security, phpinfo analysis
+- ✅ **Phase 13**: Config file parser, diff reports, AI cost tracking
 
 **Key Findings:**
 
--   ✅ All critical vulnerabilities detected (.env, .git, server-status, phpinfo)
--   ✅ All server versions identified (Apache 2.4.54, Nginx 1.18.0)
--   ✅ All security headers analyzed correctly (6 headers checked)
--   ✅ All directory listing issues identified
--   ✅ Resilient error handling (timeouts, DNS failures, connection refused)
+- ✅ All critical vulnerabilities detected (.env, .git, server-status, phpinfo)
+- ✅ All server versions identified (Apache 2.4.54, Nginx 1.18.0)
+- ✅ All security headers analyzed correctly (6 headers checked)
+- ✅ All directory listing issues identified
+- ✅ CORS, WAF, API, Cookie, phpinfo modules fully operational
+- ✅ Diff reports (`--diff last`) working across scan history
+- ✅ Resilient error handling (timeouts, DNS failures, connection refused)
 
 **Verdict:** Hephaestus is **production-ready** for server security assessments.
 
@@ -273,9 +239,9 @@ Hephaestus v0.1.0 has been **empirically validated** using controlled Docker-bas
 
 ### Prerequisites
 
--   **Python 3.11+** (3.12 recommended)
--   **pip** (Python package manager)
--   **Docker** (optional, for vulnerable labs)
+- **Python 3.11+** (3.12 recommended)
+- **pip** (Python package manager)
+- **Docker** (optional, for vulnerable labs)
 
 ### Installation
 
@@ -333,7 +299,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 
 ```bash
 python -m heph --version
-# Output: heph 0.1.0
+# Output: heph 0.2.0
 ```
 
 ### Your First Scan
@@ -411,7 +377,7 @@ Edit `config/defaults.yaml`:
 ai:
     langchain:
         provider: "openai" # Options: openai, anthropic, ollama
-        model: "gpt-4-turbo-preview"
+        model: "gpt-4o-mini-2024-07-18"
         temperature: 0.3
 ```
 
@@ -441,6 +407,30 @@ python -m heph --target https://example.com \
 python -m heph --target https://example.com \
   --use-ai \
   --ai-tone both \
+  --html
+
+# Stream AI output token-by-token
+python -m heph --target https://example.com \
+  --use-ai \
+  --ai-stream \
+  --html
+
+# Compare two AI providers in parallel
+python -m heph --target https://example.com \
+  --use-ai \
+  --ai-compare openai,anthropic \
+  --html
+
+# Agent mode with live NVD CVE lookup
+python -m heph --target https://example.com \
+  --use-ai \
+  --ai-agent \
+  --html
+
+# Set a cost budget cap (USD)
+python -m heph --target https://example.com \
+  --use-ai \
+  --ai-budget 0.50 \
   --html
 ```
 
@@ -476,10 +466,10 @@ Hephaestus uses **LangChain 1.0.0** with support for multiple AI providers.
 
 **Best for: Production use**
 
--   ⭐ Quality: Excellent (5/5)
--   ⚡ Speed: ~35 seconds
--   💰 Cost: ~$0.25 per scan
--   🔒 Privacy: Standard (data encrypted in transit)
+- ⭐ Quality: Excellent (5/5)
+- ⚡ Speed: ~35 seconds
+- 💰 Cost: ~$0.25 per scan
+- 🔒 Privacy: Standard (data encrypted in transit)
 
 ```bash
 export OPENAI_API_KEY="sk-..."
@@ -490,10 +480,10 @@ python -m pip install langchain-openai==1.0.0
 
 **Best for: Enhanced privacy**
 
--   ⭐ Quality: Excellent (5/5)
--   ⚡ Speed: ~45 seconds
--   💰 Cost: ~$0.30 per scan
--   🔒 Privacy: Enhanced (Anthropic's privacy-first approach)
+- ⭐ Quality: Excellent (5/5)
+- ⚡ Speed: ~45 seconds
+- 💰 Cost: ~$0.30 per scan
+- 🔒 Privacy: Enhanced (Anthropic's privacy-first approach)
 
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-..."
@@ -504,10 +494,10 @@ python -m pip install langchain-anthropic==1.0.0
 
 **Best for: Complete privacy**
 
--   ⭐ Quality: Good (3/5)
--   🐢 Speed: ~28 minutes (CPU) or ~75 seconds (GPU)
--   💰 Cost: Free
--   🔐 Privacy: 100% offline (data never leaves your machine)
+- ⭐ Quality: Good (3/5)
+- 🐢 Speed: ~28 minutes (CPU) or ~75 seconds (GPU)
+- 💰 Cost: Free
+- 🔐 Privacy: 100% offline (data never leaves your machine)
 
 ```bash
 # Install Ollama: https://ollama.ai
@@ -521,17 +511,17 @@ python -m pip install "langchain-ollama>=0.3.0,<0.4.0"
 
 Before sending to AI providers, Hephaestus automatically removes:
 
--   ✅ Consent tokens
--   ✅ API keys and credentials
--   ✅ Private keys and certificates
--   ✅ Internal IP addresses
--   ✅ Database credentials
+- ✅ Consent tokens
+- ✅ API keys and credentials
+- ✅ Private keys and certificates
+- ✅ Internal IP addresses
+- ✅ Database credentials
 
 **Opt-In Only**
 
--   AI analysis requires explicit `--use-ai` flag
--   Aggressive scanning requires verified consent token
--   You control which provider sees your data
+- AI analysis requires explicit `--use-ai` flag
+- Aggressive scanning requires verified consent token
+- You control which provider sees your data
 
 **For Maximum Privacy**: Use Ollama locally.
 
@@ -622,19 +612,13 @@ docker compose -f docker/compose.yml exec hephaestus python -m heph --target htt
 
 **Apache Lab (localhost:8080):**
 
--   21 findings total
--   6 critical (.env, 2x.git, 2xphpinfo, server-status)
--   2 high (version disclosure, TLS missing)
--   8 medium (headers, TRACE, directory listing)
--   5 low (headers, .htaccess/htpasswd)
+- 42 findings total (across all 13 scan phases)
+- Includes CORS, WAF, API, Cookie, phpinfo, OWASP-mapped findings
 
 **Nginx Lab (localhost:8081):**
 
--   13 findings total
--   3 critical (.env, 2x.git)
--   2 high (version disclosure, TLS missing)
--   5 medium (headers, directory listing)
--   3 low (headers)
+- 25 findings total (across all 13 scan phases)
+- Includes CORS, WAF, API, Cookie, OWASP-mapped findings
 
 ### Cleanup
 
@@ -710,7 +694,7 @@ cd docker && ./deploy.sh
 **Build the image:**
 
 ```bash
-docker build -f docker/Dockerfile -t hephaestus:0.1.0 .
+docker build -f docker/Dockerfile -t hephaestus:0.2.0 .
 ```
 
 **Run a one-off scan:**
@@ -719,7 +703,7 @@ docker build -f docker/Dockerfile -t hephaestus:0.1.0 .
 docker run --rm \
   -v $(pwd)/docker/reports:/reports \
   -v $(pwd)/docker/data:/data \
-  hephaestus:0.1.0 \
+  hephaestus:0.2.0 \
   --target https://example.com \
   --html
 ```
@@ -730,7 +714,7 @@ docker run --rm \
 docker run --rm \
   -v $(pwd)/docker/reports:/reports \
   -e OPENAI_API_KEY="$OPENAI_API_KEY" \
-  hephaestus:0.1.0 \
+  hephaestus:0.2.0 \
   --target https://example.com \
   --use-ai \
   --ai-tone both \
@@ -746,7 +730,7 @@ docker compose -f docker/compose.testing.yml up -d
 # Scan from container (join the testing lab network)
 docker run --rm \
   --network hephaestus-lab \
-  hephaestus:0.1.0 \
+  hephaestus:0.2.0 \
   --target http://hephaestus-vulnerable-apache
 ```
 
@@ -768,11 +752,13 @@ docker run --rm \
         └── hephaestus.log
 ```
 
-### Finding IDs (Pattern)
+### Finding IDs (Pattern, 70+ total)
 
 ```
 HEPH-SRV-001: Server version disclosed (Apache/Nginx/IIS)
 HEPH-SRV-004: Server disclosed in error page
+HEPH-SRV-016: PHP version disclosed in Server header
+HEPH-SRV-017: OpenSSL version disclosed in Server header
 HEPH-FILE-001: Environment file exposed (.env)
 HEPH-FILE-002: Git repository exposed
 HEPH-FILE-003: PHP information page exposed
@@ -788,15 +774,22 @@ HEPH-HDR-006: Missing security header: Permissions-Policy
 HEPH-CFG-001: Directory listing enabled
 HEPH-TLS-000: TLS not enabled
 HEPH-TLS-001: Weak TLS protocol (SSLv3, TLS 1.0)
+HEPH-TLS-002: Weak cipher suite enabled
+COR-001 to COR-006: CORS misconfiguration findings
+ROB-001/002/003: Robots.txt intelligence findings
+WAF-001/002: WAF detection findings
+API-001 to API-005: API discovery findings
+COO-001 to COO-005: Cookie security findings
+PHP-001 to PHP-009: phpinfo() dangerous settings
 ```
 
 ### Severity Mapping
 
--   **CRITICAL**: .env exposed, .git accessible, phpinfo, server-status, SQL dumps
--   **HIGH**: Server version disclosed, weak TLS, TLS missing, unsafe HTTP methods
--   **MEDIUM**: Missing important headers (HSTS, CSP, X-Frame-Options), directory listing, error page disclosure
--   **LOW**: Minor headers (X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
--   **INFO**: Informational findings (server detected, TLS 1.2 OK)
+- **CRITICAL**: .env exposed, .git accessible, phpinfo, server-status, SQL dumps
+- **HIGH**: Server version disclosed, weak TLS, TLS missing, unsafe HTTP methods
+- **MEDIUM**: Missing important headers (HSTS, CSP, X-Frame-Options), directory listing, error page disclosure
+- **LOW**: Minor headers (X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+- **INFO**: Informational findings (server detected, TLS 1.2 OK)
 
 ---
 
@@ -806,29 +799,43 @@ HEPH-TLS-001: Weak TLS protocol (SSLv3, TLS 1.0)
 hephaestus-server-forger/
 │
 ├── heph/                       # Main application package
-│   ├── checks/                 # Security check modules
+│   ├── checks/                 # Security check modules (13 phases)
 │   │   ├── __init__.py
-│   │   ├── config.py           # Directory listing checks
-│   │   ├── files.py            # Sensitive file detection
-│   │   ├── headers.py          # Security headers analysis
-│   │   ├── http_methods.py     # HTTP methods testing
-│   │   ├── server_info.py      # Server fingerprinting
-│   │   └── tls.py              # TLS/SSL configuration
+│   │   ├── api_discovery.py    # Phase 11: Swagger/OpenAPI/GraphQL exposure
+│   │   ├── config.py           # Phase 5: Directory listing detection
+│   │   ├── config_file.py      # Phase 14: Offline httpd.conf/nginx.conf parser
+│   │   ├── cookies.py          # Phase 12: HttpOnly/Secure/SameSite analysis
+│   │   ├── cors.py             # Phase 8: CORS wildcard & reflection probes
+│   │   ├── files.py            # Phase 2: 70+ sensitive file paths
+│   │   ├── headers.py          # Phase 4: Security headers analysis
+│   │   ├── http_methods.py     # Phase 3: Unsafe HTTP methods (PUT/DELETE/TRACE)
+│   │   ├── phpinfo.py          # Phase 13: phpinfo() dangerous settings
+│   │   ├── ports.py            # Phase 7: 37-port scanner with banner grabbing
+│   │   ├── robots.py           # Phase 9: robots.txt disallowed path analysis
+│   │   ├── server_info.py      # Phase 1: Apache/Nginx/IIS fingerprinting
+│   │   ├── tls.py              # Phase 6: Deep TLS/SSL + CVE correlation
+│   │   └── waf.py              # Phase 10: 13 WAF signatures detection
 │   │
 │   ├── core/                   # Core infrastructure
 │   │   ├── __init__.py
-│   │   ├── ai.py               # AI integration (LangChain)
-│   │   ├── config.py           # Configuration management
-│   │   ├── consent.py          # Consent token system
-│   │   ├── db.py               # SQLite database (shared with Argos)
-│   │   ├── http_client.py      # Rate-limited HTTP client
+│   │   ├── ai.py               # LangChain AI (GPT-4/Claude/Ollama) + cost tracking
+│   │   ├── config.py           # Configuration loader
+│   │   ├── consent.py          # Consent token system (HTTP + DNS)
+│   │   ├── cve_lookup.py       # NVD CVE API integration
+│   │   ├── db.py               # SQLite — shared with Argos suite (~/.argos/argos.db)
+│   │   ├── diff.py             # Scan diff engine (--diff last / --diff <id>)
+│   │   ├── http_client.py      # Token-bucket rate-limited HTTP client
 │   │   ├── logging.py          # Structured logging
-│   │   └── report.py           # Report generation
+│   │   ├── owasp.py            # HEPH-* code → OWASP Top 10 2021 mapper
+│   │   └── report.py           # JSON + HTML report generation
 │   │
 │   ├── __init__.py             # Package metadata
 │   ├── __main__.py             # Entry point
-│   ├── cli.py                  # CLI argument parser
-│   └── scanner.py              # Main scan orchestrator
+│   ├── cli.py                  # CLI (30+ flags incl. --use-ai, --diff, --config-file)
+│   └── scanner.py              # Orchestrator — 13 parallel phases
+│
+├── assets/
+│   └── ascii.txt               # Hephaestus braille ASCII art
 │
 ├── config/                     # Configuration files
 │   ├── defaults.yaml           # Default settings
@@ -837,36 +844,45 @@ hephaestus-server-forger/
 │       └── non_technical.txt   # Executive summary prompt
 │
 ├── db/
-│   └── migrate.sql             # Shared database schema (Argos)
+│   └── migrate.sql             # Shared database schema (Argos suite)
 │
 ├── docker/                     # Docker deployment
-│   ├── vulnerable-apache/                 # Vulnerable Apache lab script
+│   ├── vulnerable-apache/      # Vulnerable Apache lab (port 8080/8443)
 │   │   └── docker-entrypoint.sh
-│   ├── vulnerable-nginx/                  # Vulnerable Nginx lab script
+│   ├── vulnerable-nginx/       # Vulnerable Nginx lab (port 8081/8444)
 │   │   └── docker-entrypoint.sh
-│   ├── compose.yml
+│   ├── compose.yml             # Production stack
+│   ├── compose.testing.yml     # Vulnerable lab stack
+│   ├── deploy.sh               # Interactive deployment script
 │   └── Dockerfile              # Production image
 │
 ├── docs/                       # Documentation
-│   ├── AI_INTEGRATION.md       # AI setup guide
+│   ├── media/                  # README visual assets
+│   │   ├── hephaestus-banner.webp  # Banner 1280×400
+│   │   ├── hephaestus-hero.webp    # Hero 1600×640
+│   │   ├── console.webp            # Terminal scan output
+│   │   ├── report_html.webp        # HTML report header
+│   │   └── report_findings.webp    # Findings table with CVE badges
+│   ├── AI_INTEGRATION.md       # AI providers setup guide
 │   ├── CONSENT.md              # Consent system details
-│   ├── DATABASE_GUIDE.md       # Database reference
-│   ├── ETHICS.md               # Ethical guidelines
-│   ├── REPORT_FORMAT.md        # Report specification
-│   ├── ROADMAP.md              # Development roadmap
-│   ├── TESTING_GUIDE.md        # Safe testing practices
-│   └── VALIDATION_REPORT.md    # Tests that validate the tool
+│   ├── DATABASE_GUIDE.md       # Shared database reference
+│   ├── ETHICS.md               # Ethical use guidelines
+│   ├── REPORT_FORMAT.md        # JSON/HTML report specification
+│   ├── ROADMAP.md              # v0.3.0 tickets and priorities
+│   └── TESTING_GUIDE.md        # Safe testing practices
 │
 ├── schema/
-│   └── report.schema.json      # JSON report schema
+│   └── report.schema.json      # JSON report schema (OWASP + CVE fields)
 │
 ├── scripts/
 │   └── cli-examples.md         # CLI usage examples
 │
 ├── templates/
-│   └── report.html.j2          # HTML report template (Jinja2)
+│   └── report.html.j2          # HTML report template — forge theme
 │
 ├── CHANGELOG.md                # Version history
+├── CODE_OF_CONDUCT.md          # Community guidelines
+├── CONTRIBUTING.md             # Contribution guide
 ├── LICENSE                     # MIT License
 ├── README.md                   # This file
 ├── requirements.txt            # Python dependencies
@@ -877,52 +893,64 @@ hephaestus-server-forger/
 
 ## 🗺️ Roadmap
 
-### v0.1.0 — Initial Release ✅ (November 2025)
+### v0.1.0 — Initial Release ✅ (January 2026)
+
+**Status:** 🎉 **Released** (superseded by v0.2.0)
+
+- ✅ 6 security check modules (server, files, methods, headers, TLS, config)
+- ✅ AI-powered hardening guides (OpenAI, Anthropic, Ollama)
+- ✅ Consent token system (HTTP + DNS verification)
+- ✅ Professional reporting (JSON + HTML with AI analysis)
+- ✅ SQLite persistence (SHARED with Argos suite: `~/.argos/argos.db`)
+- ✅ Docker support with vulnerable labs (Apache & Nginx)
+- ✅ Comprehensive error handling and resilience
+- ✅ 55+ validation tests (10 phases, 100% passing)
+
+### v0.2.0 — Enhanced Detection ✅ (May 2026)
 
 **Status:** 🎉 **Released**
 
--   ✅ 6 security check modules (server, files, methods, headers, TLS, config)
--   ✅ AI-powered hardening guides (OpenAI, Anthropic, Ollama)
--   ✅ Consent token system (HTTP + DNS verification)
--   ✅ Professional reporting (JSON + HTML with AI analysis)
--   ✅ SQLite persistence (SHARED with Argos suite: `~/.argos/argos.db`)
--   ✅ Docker support with vulnerable labs (Apache & Nginx)
--   ✅ Comprehensive error handling and resilience
--   ✅ 55+ validation tests (10 phases, 100% passing)
-
-### v0.2.0 — Enhanced Detection (Q2 2026)
-
-**Focus:** Detection accuracy, AI features, reporting improvements
-
--   🔜 **Deep TLS Analysis**: SSLyze integration for cipher suites, protocols, certificate chains
--   🔜 **Framework Detection**: Laravel, Symfony, Express.js, Django, Rails
--   🔜 **Apache/Nginx Config Parser**: Analyze httpd.conf, nginx.conf for misconfigurations
--   🔜 **PHP.ini Audit**: Detect dangerous PHP settings (allow_url_fopen, display_errors)
--   🔜 **Enhanced HTML Reports**: CVE badges, configuration snippets, better UX
--   🔜 **AI Cost Tracking**: Budget limits, token usage monitoring
--   🔜 **AI Streaming**: Real-time progress for long analyses
--   🔜 **PDF Export**: Customizable PDF reports with branding
+- ✅ **13 scan phases** (7 new phases added over v0.1.0)
+- ✅ **Deep TLS Analysis**: SSLyze integration, cipher suites, CVE correlation, A+/F grading
+- ✅ **Framework & Module Detection**: Laravel, Django, Rails, mod_security, WAF detection
+- ✅ **Apache/Nginx Config Parser** (`--config-file`): Offline analysis of httpd.conf/nginx.conf
+- ✅ **CORS Detection**: Wildcard, null-origin, reflection probes (COR-001 to COR-006)
+- ✅ **Robots.txt Intelligence**: Disallowed path analysis, live accessibility probes (ROB-001/002/003)
+- ✅ **WAF Detection**: 13 signatures including Cloudflare, Sucuri, ModSecurity, AWS WAF (WAF-001/002)
+- ✅ **API Discovery**: Swagger/OpenAPI, GraphQL introspection, unauthenticated endpoints (API-001 to API-005)
+- ✅ **Cookie Security**: Per-cookie HttpOnly/Secure/SameSite analysis (COO-001 to COO-005)
+- ✅ **phpinfo() Deep Analysis**: 9 dangerous PHP settings (PHP-001 to PHP-009)
+- ✅ **OWASP Top 10 2021** mapping on every finding
+- ✅ **Live CVE Lookup** via NVD API v2 (Apache, Nginx, PHP, OpenSSL)
+- ✅ **Port Scanner**: 37 ports with banner grabbing
+- ✅ **AI Cost Tracking** (`--ai-budget`): Budget limits, costs.json, ai_costs table
+- ✅ **AI Streaming** (`--ai-stream`): Real-time token-by-token output
+- ✅ **AI Compare** (`--ai-compare`): Run two providers in parallel
+- ✅ **AI Agent** (`--ai-agent`): LangChain agent with NVD CVE lookup
+- ✅ **Diff Reports** (`--diff last` / `--diff SCAN_ID`): new/fixed/persisting findings
+- ✅ **Enhanced HTML Reports**: CVE/CWE badges, filter bar, expandable config snippets, AI tabs
+- ✅ 70+ finding codes validated
 
 ### v0.3.0 — Enterprise Features (Q3 2026)
 
 **Focus:** Usability, scale, interactive AI
 
--   🔜 **Interactive Config Management**: Metasploit-style interface (`heph --show-options`, `heph --set`)
--   🔜 **Database CLI**: No SQL required (`heph db scans list`, `heph db findings search`)
--   🔜 **Multi-Site Scanning**: Batch processing from file
--   🔜 **AI Chat Interface**: Conversational hardening guidance
--   🔜 **CI/CD Integration**: GitHub Actions, Jenkins, GitLab templates
--   🔜 **REST API Server**: FastAPI-based API for automation
--   🔜 **Nmap Integration**: Port scanning for comprehensive assessment
+- 🔜 **Interactive Config Management**: Metasploit-style interface (`heph --show-options`, `heph --set`)
+- 🔜 **Database CLI**: No SQL required (`heph db scans list`, `heph db findings search`)
+- 🔜 **Multi-Site Scanning**: Batch processing from file
+- 🔜 **AI Chat Interface**: Conversational hardening guidance
+- 🔜 **CI/CD Integration**: GitHub Actions, Jenkins, GitLab templates
+- 🔜 **REST API Server**: FastAPI-based API for automation
+- 🔜 **Nmap Integration**: Port scanning for comprehensive assessment
 
 ### v0.4.0 — Intelligence & Automation (Q4 2026)
 
 **Focus:** ML, automation, advanced AI
 
--   🔜 **Automated Remediation**: Ansible/Puppet playbooks for auto-fixing
--   🔜 **ML-Based Detection**: Anomaly detection, false positive reduction
--   🔜 **Distributed Scanning**: Worker nodes for large-scale operations
--   🔜 **Advanced AI Agents**: Autonomous scan planning, exploit generation
+- 🔜 **Automated Remediation**: Ansible/Puppet playbooks for auto-fixing
+- 🔜 **ML-Based Detection**: Anomaly detection, false positive reduction
+- 🔜 **Distributed Scanning**: Worker nodes for large-scale operations
+- 🔜 **Advanced AI Agents**: Autonomous scan planning, exploit generation
 
 ### Pro Track (Q1 2027)
 
@@ -946,18 +974,18 @@ Hephaestus implements **technical controls** to prevent misuse:
 
 | Mode            | Checks          | Consent Required | Rate Limit |
 | --------------- | --------------- | ---------------- | ---------- |
-| **Safe**        | Non-intrusive   | ❌ No            | 3 req/s    |
-| **Aggressive**  | Deep probing    | ✅ Yes           | 8 req/s    |
+| **Safe**        | Non-intrusive   | ❌ No            | 5 req/s    |
+| **Aggressive**  | Deep probing    | ✅ Yes           | 12 req/s   |
 | **AI Analysis** | Hardening guide | ✅ Yes           | N/A        |
 
 ### Legal Framework
 
 Unauthorized access to computer systems is **illegal** in most jurisdictions:
 
--   🇺🇸 **USA**: Computer Fraud and Abuse Act (CFAA)
--   🇬🇧 **UK**: Computer Misuse Act 1990
--   🇪🇺 **EU**: Directive 2013/40/EU
--   🌍 **International**: Various cybercrime laws
+- 🇺🇸 **USA**: Computer Fraud and Abuse Act (CFAA)
+- 🇬🇧 **UK**: Computer Misuse Act 1990
+- 🇪🇺 **EU**: Directive 2013/40/EU
+- 🌍 **International**: Various cybercrime laws
 
 ### Best Practices
 
@@ -977,10 +1005,10 @@ For complete ethical guidelines, see [docs/ETHICS.md](docs/ETHICS.md)
 
 We welcome contributions! Whether it's:
 
--   🐛 Bug reports
--   💡 Feature requests
--   📝 Documentation improvements
--   🔧 Code contributions
+- 🐛 Bug reports
+- 💡 Feature requests
+- 📝 Documentation improvements
+- 🔧 Code contributions
 
 ### How to Contribute
 
@@ -1022,11 +1050,11 @@ Found a bug? Have a feature request?
 
 Please include:
 
--   Hephaestus version (`python -m heph --version`)
--   Python version (`python --version`)
--   Operating system
--   Steps to reproduce (for bugs)
--   Expected vs actual behavior
+- Hephaestus version (`python -m heph --version`)
+- Python version (`python --version`)
+- Operating system
+- Steps to reproduce (for bugs)
+- Expected vs actual behavior
 
 ---
 
@@ -1046,9 +1074,9 @@ Comprehensive documentation available in the `docs/` directory:
 
 ### Quick Links
 
--   **Changelog**: [CHANGELOG.md](CHANGELOG.md)
--   **License**: [LICENSE](LICENSE)
--   **CLI Examples**: [scripts/cli-examples.md](scripts/cli-examples.md)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+- **License**: [LICENSE](LICENSE)
+- **CLI Examples**: [scripts/cli-examples.md](scripts/cli-examples.md)
 
 ---
 
@@ -1096,10 +1124,10 @@ By using Hephaestus, you acknowledge and agree that:
 
 If you discover vulnerabilities using Hephaestus:
 
--   📧 Contact the site owner privately first
--   ⏰ Give reasonable time to fix (typically 90 days)
--   🤝 Coordinate disclosure timeline
--   📝 Document your findings professionally
+- 📧 Contact the site owner privately first
+- ⏰ Give reasonable time to fix (typically 90 days)
+- 🤝 Coordinate disclosure timeline
+- 📝 Document your findings professionally
 
 ### When in Doubt
 
@@ -1111,13 +1139,13 @@ If you discover vulnerabilities using Hephaestus:
 
 Hephaestus stands on the shoulders of giants:
 
--   **Apache & Nginx** — Documentation and hardening guides
--   **OWASP** — Security standards (Top 10, Testing Guide, Secure Headers Project)
--   **CIS Benchmarks** — Server hardening best practices
--   **LangChain** — AI framework for intelligent analysis
--   **Anthropic & OpenAI** — AI models for vulnerability analysis
--   **Ollama** — Local AI inference for privacy-focused scanning
--   **Python Community** — Amazing libraries and tools
+- **Apache & Nginx** — Documentation and hardening guides
+- **OWASP** — Security standards (Top 10, Testing Guide, Secure Headers Project)
+- **CIS Benchmarks** — Server hardening best practices
+- **LangChain** — AI framework for intelligent analysis
+- **Anthropic & OpenAI** — AI models for vulnerability analysis
+- **Ollama** — Local AI inference for privacy-focused scanning
+- **Python Community** — Amazing libraries and tools
 
 Special thanks to all security researchers who practice and promote ethical hacking.
 
@@ -1127,9 +1155,9 @@ Special thanks to all security researchers who practice and promote ethical hack
 
 **Rodney Dhavid Jimenez Chacin (rodhnin)**
 
--   🌐 Website & Contact: [rodhnin.com](https://rodhnin.com)
--   💼 GitHub: [@rodhnin](https://github.com/rodhnin)
--   🔗 Project: [hephaestus-server-forger](https://github.com/rodhnin/hephaestus-server-forger)
+- 🌐 Website & Contact: [rodhnin.com](https://rodhnin.com)
+- 💼 GitHub: [@rodhnin](https://github.com/rodhnin)
+- 🔗 Project: [hephaestus-server-forger](https://github.com/rodhnin/hephaestus-server-forger)
 
 For questions, feedback, or collaboration inquiries, please visit [rodhnin.com](https://rodhnin.com) to contact me.
 
@@ -1137,9 +1165,9 @@ For questions, feedback, or collaboration inquiries, please visit [rodhnin.com](
 
 ## 💬 Community
 
--   **Discussions**: [GitHub Discussions](https://github.com/rodhnin/hephaestus-server-forger/discussions)
--   **Issues**: [GitHub Issues](https://github.com/rodhnin/hephaestus-server-forger/issues)
--   **Releases**: [GitHub Releases](https://github.com/rodhnin/hephaestus-server-forger/releases)
+- **Discussions**: [GitHub Discussions](https://github.com/rodhnin/hephaestus-server-forger/discussions)
+- **Issues**: [GitHub Issues](https://github.com/rodhnin/hephaestus-server-forger/issues)
+- **Releases**: [GitHub Releases](https://github.com/rodhnin/hephaestus-server-forger/releases)
 
 ---
 
@@ -1153,6 +1181,6 @@ For questions, feedback, or collaboration inquiries, please visit [rodhnin.com](
 
 ---
 
-_Hephaestus v0.1.0 — November 2025_
+_Hephaestus v0.2.0 — May 2026_
 
 </div>

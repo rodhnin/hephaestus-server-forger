@@ -79,17 +79,26 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 
 ## Configuration
 
-### ⚠️ IMPORTANT: Provider Switching (v0.1.0)
+### Provider Switching (v0.2.0)
 
-**Current Method:** Provider selection is configured in `config/defaults.yaml`.
+Provider selection can be set via CLI flags or in `config/defaults.yaml`.
 
-**To switch providers, you must edit the YAML file directly:**
+**Via CLI (recommended):**
+
+```bash
+# Override provider and model at runtime
+python -m heph --target https://example.com --use-ai \
+  --ai-provider anthropic \
+  --ai-model claude-3-5-haiku-20241022
+```
+
+**Via config file:**
 
 ```yaml
 ai:
     langchain:
         provider: "openai" # Change this to: openai, anthropic, or ollama
-        model: "gpt-4-turbo-preview" # Update model based on provider
+        model: "gpt-4o-mini-2024-07-18" # Default model
         temperature: 0.3
         max_tokens: 2000
 
@@ -105,7 +114,7 @@ ai:
 ai:
     langchain:
         provider: "openai"
-        model: "gpt-4-turbo-preview" # or gpt-4, gpt-3.5-turbo
+        model: "gpt-4o-mini-2024-07-18" # or gpt-4o, gpt-4-turbo-preview
     api_key_env: "OPENAI_API_KEY"
 ```
 
@@ -130,16 +139,28 @@ ai:
     # No API key needed for Ollama
 ```
 
-### Future Enhancement (v0.3.0)
+### New AI Flags (v0.2.0)
 
-In version 0.3.0, we will implement an interactive configuration system:
+The following AI flags were added in v0.2.0:
 
--   Dynamic provider switching without editing YAML
--   Runtime model selection
--   Interactive configuration menu
--   Profile management for different scenarios
+```bash
+# Stream AI output token-by-token
+python -m heph --target https://example.com --use-ai --ai-stream
 
-For now, manual YAML editing is required for provider switching.
+# Compare two AI providers in parallel
+python -m heph --target https://example.com --use-ai \
+  --ai-compare openai,anthropic
+
+# Compare with specific models
+python -m heph --target https://example.com --use-ai \
+  --ai-compare openai:gpt-4o-mini-2024-07-18,anthropic:claude-3-5-haiku-20241022
+
+# Agent mode with live NVD CVE lookup
+python -m heph --target https://example.com --use-ai --ai-agent
+
+# Set a cost budget cap (USD)
+python -m heph --target https://example.com --use-ai --ai-budget 0.50
+```
 
 ---
 
@@ -172,7 +193,7 @@ python -m heph --target https://example.com --aggressive --use-ai --html
 
 **Benefits:**
 
--   More findings detected (8 req/s rate)
+-   More findings detected (12 req/s rate)
 -   Deeper analysis from AI
 -   Comprehensive hardening guide
 
@@ -325,7 +346,7 @@ python -m heph --target http://localhost:8080 --use-ai --html
 
 ## Custom Prompts
 
-Prompts are stored in `heph/prompts/`:
+Prompts are stored in `config/prompts/`:
 
 ### Technical Prompt (`technical.txt`)
 
@@ -394,11 +415,11 @@ This will tell you exactly what's wrong.
 3. Verify API keys/connectivity
 4. Try with a simpler report (fewer findings)
 
-#### "Input to PromptTemplate is missing variables"
+#### "--ai-agent or --ai-compare warning"
 
--   This was a bug in v0.1.0 (fixed in templates)
--   Update your prompts with escaped curly braces: `{{` and `}}`
--   See `heph/prompts/technical.txt` for corrected version
+-   These modes make additional API calls and may increase cost
+-   Use `--ai-budget USD` to cap spending
+-   Agent mode requires internet access to reach the NVD API
 
 ---
 
@@ -418,6 +439,20 @@ This will tell you exactly what's wrong.
 -   Enable max_evidence_length truncation
 -   Use GPT-3.5-turbo for quick analysis
 -   Use Ollama for testing/development
+
+### Cost Storage
+
+AI costs are stored in two places:
+
+1. **`~/.argos/costs.json`** — human-readable JSON log (shared with Argus)
+2. **`~/.argos/argos.db` — `ai_costs` table** — structured SQLite record for querying
+
+```sql
+-- Query AI spending by model
+SELECT model, SUM(cost_usd) as total, COUNT(*) as calls
+FROM ai_costs WHERE tool='hephaestus'
+GROUP BY model ORDER BY total DESC;
+```
 
 ---
 
@@ -513,14 +548,16 @@ AI analysis is embedded in the JSON report:
 ```json
 {
   "tool": "hephaestus",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "target": "https://example.com",
   "findings": [...],
   "ai_analysis": {
     "executive_summary": "Your web server has MODERATE security...",
     "technical_remediation": "## 1. EXECUTIVE SUMMARY\n\nThe security audit...",
-    "generated_at": "2025-10-21T14:30:00Z",
-    "model_used": "openai/gpt-4-turbo-preview"
+    "agent_analysis": "## Agent Findings\n\n...",
+    "compare_results": {...},
+    "generated_at": "2026-04-01T14:30:00Z",
+    "model_used": "openai/gpt-4o-mini-2024-07-18"
   }
 }
 ```

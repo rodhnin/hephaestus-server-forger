@@ -92,6 +92,12 @@ def create_parser() -> argparse.ArgumentParser:
         metavar='PATH',
         help='SQLite database path (default: ~/.argos/argos.db - SHARED)'
     )
+    output_group.add_argument(
+        '--diff',
+        metavar='SCAN_ID',
+        help='Compare this scan against a previous scan ID (use "last" for most recent). '
+             'Adds a diff section to the report showing new, fixed, and persisting findings.'
+    )
     
     # Verbosity options
     verbose_group = parser.add_argument_group('Logging & Verbosity')
@@ -143,6 +149,43 @@ def create_parser() -> argparse.ArgumentParser:
         metavar='VAR',
         help='Environment variable for AI API key [default: OPENAI_API_KEY]'
     )
+    ai_group.add_argument(
+        '--ai-provider',
+        choices=['openai', 'anthropic', 'ollama'],
+        metavar='PROVIDER',
+        help='AI provider override: openai, anthropic, or ollama'
+    )
+    ai_group.add_argument(
+        '--ai-model',
+        type=str,
+        metavar='MODEL',
+        help='AI model override (e.g. gpt-4o-mini-2024-07-18)'
+    )
+    ai_group.add_argument(
+        '--ai-stream',
+        action='store_true',
+        help='Stream AI output token-by-token in real time'
+    )
+    ai_group.add_argument(
+        '--ai-compare',
+        type=str,
+        metavar='PROVIDERS',
+        help=(
+            'Run analysis through multiple AI providers in parallel and compare results. '
+            'Format: openai,anthropic or openai:gpt-4o-mini,anthropic:claude-3-5-haiku-20241022'
+        )
+    )
+    ai_group.add_argument(
+        '--ai-agent',
+        action='store_true',
+        help='Use AI agent mode with live tool calls: NVD CVE lookup and server vulnerability search'
+    )
+    ai_group.add_argument(
+        '--ai-budget',
+        type=float,
+        metavar='USD',
+        help='Maximum AI cost per scan in USD (enables budget tracking)'
+    )
     
     # Consent token options
     consent_group = parser.add_argument_group('Consent Token Management')
@@ -171,6 +214,18 @@ def create_parser() -> argparse.ArgumentParser:
         help='Consent token to verify (format: verify-<hex>)'
     )
     
+    # Config file analysis (IMPROV-005)
+    config_file_group = parser.add_argument_group('Config File Analysis (Offline)')
+    config_file_group.add_argument(
+        '--config-file',
+        type=str,
+        metavar='PATH',
+        help=(
+            'Analyze an Apache (httpd.conf) or Nginx (nginx.conf) config file offline. '
+            'No HTTP requests are made. Can be combined with --target for a full scan + config review.'
+        )
+    )
+
     # Server-specific options
     server_group = parser.add_argument_group('Server-Specific Options')
     server_group.add_argument(
@@ -190,7 +245,7 @@ def create_parser() -> argparse.ArgumentParser:
         '--rate',
         type=float,
         metavar='RATE',
-        help='Request rate limit (req/sec, default: 3.0 safe, 8.0 aggressive)'
+        help='Request rate limit (req/sec, default: 5.0 safe, 12.0 aggressive)'
     )
     advanced_group.add_argument(
         '--timeout',
@@ -220,10 +275,37 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         '--version',
         action='version',
-        version='%(prog)s 0.1.0'
+        version='%(prog)s 0.2.0'
     )
     
     return parser
+
+
+def _parse_compare_arg(compare_str: str):
+    """
+    Parse --ai-compare argument into list of {provider, model} dicts.
+
+    Formats accepted:
+      "openai,anthropic"
+      "openai:gpt-4o-mini-2024-07-18,anthropic:claude-3-5-haiku-20241022"
+    """
+    DEFAULT_MODELS = {
+        'openai':    'gpt-4o-mini-2024-07-18',
+        'anthropic': 'claude-3-5-haiku-20241022',
+        'ollama':    'llama3.2',
+    }
+    providers = []
+    for part in compare_str.split(','):
+        part = part.strip()
+        if not part:
+            continue
+        if ':' in part:
+            pname, model = part.split(':', 1)
+        else:
+            pname = part
+            model = DEFAULT_MODELS.get(pname.lower(), pname)
+        providers.append({'provider': pname.lower(), 'model': model})
+    return providers
 
 
 def handle_gen_consent(args, config: Config):
@@ -283,6 +365,77 @@ def handle_verify_consent(args, config: Config):
         print("="*70 + "\n")
         
         return 1
+
+
+def handle_config_file(args, config: Config):
+    """
+    Handle offline config file analysis (IMPROV-005).
+    Can run standalone (no --target) or combined with a live scan.
+    """
+    from .checks.config_file import ConfigFileParser
+    from .core.report import ReportGenerator
+    import time
+
+    config_path = args.config_file
+    logger.info(f"Config file analysis: {config_path}")
+
+    parser_obj = ConfigFileParser(config)
+    findings = parser_obj.analyze(config_path)
+
+    # Print summary to console
+    severity_order = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3, 'info': 4}
+    findings_sorted = sorted(findings, key=lambda f: severity_order.get(f['severity'], 5))
+
+    print("\n" + "=" * 70)
+    print("CONFIG FILE ANALYSIS RESULTS")
+    print("=" * 70)
+    print(f"File: {config_path}")
+    print(f"Findings: {len(findings)}\n")
+
+    counts = {}
+    for f in findings:
+        sev = f['severity']
+        counts[sev] = counts.get(sev, 0) + 1
+
+    for sev in ['critical', 'high', 'medium', 'low', 'info']:
+        if sev in counts:
+            print(f"  {sev.upper():8s}: {counts[sev]}")
+
+    print()
+    for f in findings_sorted:
+        print(f"[{f['severity'].upper():8s}] [{f['id']}] {f['title']}")
+        ev = f.get('evidence', {})
+        if ev.get('context'):
+            print(f"           {ev['context']}")
+
+    print("=" * 70)
+
+    # Generate JSON report
+    report_gen = ReportGenerator(config)
+    import socket
+    target_label = f"file://{config_path}"
+    report = report_gen.create_report(
+        tool='hephaestus',
+        target=target_label,
+        mode='offline',
+        findings=findings,
+        scan_duration=0.0,
+        requests_sent=0,
+        consent=None,
+    )
+
+    json_path = report_gen.save_json(report)
+    print(f"\nJSON report: {json_path}")
+
+    if config.generate_html:
+        try:
+            html_path = report_gen.generate_html(report, json_path)
+            print(f"HTML report: {html_path}")
+        except Exception as e:
+            logger.warning(f"HTML generation failed: {e}")
+
+    print("=" * 70 + "\n")
+    return 0
 
 
 def handle_scan(args, config: Config):
@@ -352,11 +505,26 @@ def handle_scan(args, config: Config):
         scanner = ServerScanner(config)
         
         # Run scan
+        # Parse --ai-compare
+        compare_providers = None
+        if hasattr(args, 'ai_compare') and args.ai_compare:
+            try:
+                compare_providers = _parse_compare_arg(args.ai_compare)
+                if not compare_providers:
+                    logger.error("--ai-compare: no valid providers parsed")
+                    return 1
+            except Exception as e:
+                logger.error(f"--ai-compare parse error: {e}")
+                return 1
+
         result = scanner.scan(
             target=args.target,
             mode=mode,
             use_ai=args.use_ai,
-            ai_tone=args.ai_tone if args.use_ai else None
+            ai_tone=args.ai_tone if args.use_ai else None,
+            ai_compare=compare_providers,
+            ai_agent=getattr(args, 'ai_agent', False),
+            diff_ref=getattr(args, 'diff', None),
         )
         
         # Return appropriate exit code based on scan status
@@ -451,7 +619,18 @@ def main(argv=None):
     
     if args.use_ai:
         cli_overrides.setdefault('ai', {})['enabled'] = True
-    
+
+    # AI provider/model overrides (v0.2.0)
+    if hasattr(args, 'ai_provider') and args.ai_provider:
+        cli_overrides.setdefault('ai', {}).setdefault('langchain', {})['provider'] = args.ai_provider
+    if hasattr(args, 'ai_model') and args.ai_model:
+        cli_overrides.setdefault('ai', {}).setdefault('langchain', {})['model'] = args.ai_model
+    if hasattr(args, 'ai_stream') and args.ai_stream:
+        cli_overrides.setdefault('ai', {})['streaming'] = True
+    if hasattr(args, 'ai_budget') and args.ai_budget is not None:
+        cli_overrides.setdefault('ai', {}).setdefault('budget', {})['enabled'] = True
+        cli_overrides['ai']['budget']['max_cost_per_scan'] = args.ai_budget
+
     config = Config.load(cli_overrides=cli_overrides)
     config.expand_paths()
     config.ensure_directories()
@@ -483,13 +662,23 @@ def main(argv=None):
     try:
         if args.gen_consent:
             return handle_gen_consent(args, config)
-        
+
         elif args.verify_consent:
             return handle_verify_consent(args, config)
-        
+
+        elif args.config_file and not args.target:
+            # Standalone config file analysis (no live scan)
+            return handle_config_file(args, config)
+
         elif args.target:
-            return handle_scan(args, config)
-        
+            # Live scan — optionally also analyze a config file
+            result = handle_scan(args, config)
+            if args.config_file:
+                print("\n" + "-" * 70)
+                print("Running offline config file analysis...")
+                handle_config_file(args, config)
+            return result
+
         else:
             parser.print_help()
             return 0

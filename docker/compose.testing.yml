@@ -48,7 +48,7 @@ services:
     labels:
       - "com.hephaestus.service=testing-lab"
       - "com.hephaestus.server=apache"
-      - "com.hephaestus.version=0.1.0"
+      - "com.hephaestus.version=0.2.0"
 
   vulnerable-nginx:
     image: nginx:1.18-alpine
@@ -63,7 +63,7 @@ services:
       - hephaestus-lab
     entrypoint: ["/docker-entrypoint.sh"]
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/.env"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/.env"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -71,7 +71,7 @@ services:
     labels:
       - "com.hephaestus.service=testing-lab"
       - "com.hephaestus.server=nginx"
-      - "com.hephaestus.version=0.1.0"
+      - "com.hephaestus.version=0.2.0"
 
 networks:
   hephaestus-lab:

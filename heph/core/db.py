@@ -1,8 +1,5 @@
 """
-Hephaestus Database Module - WITH CORRUPTION & READ-ONLY RECOVERY
-
-CRITICAL: This database is SHARED with Argus and Pythia.
-All three tools write to the same ~/.argos/argos.db file.
+Hephaestus Database Module
 
 Author: Rodney Dhavid Jimenez Chacin (rodhnin)
 License: MIT

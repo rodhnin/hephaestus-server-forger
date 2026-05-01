@@ -120,7 +120,7 @@ class SecurityHeadersChecker:
             findings.extend(self._check_xfo(target, headers))
             
             # 5. Check cookie security
-            findings.extend(self._check_cookies(target, headers))
+            findings.extend(self._check_cookies(target, response))
             
             # 6. Check for legacy/deprecated headers
             findings.extend(self._check_deprecated_headers(target, headers))
@@ -308,81 +308,94 @@ class SecurityHeadersChecker:
         
         return findings
     
-    def _check_cookies(self, target: str, headers: dict) -> List[Dict[str, Any]]:
+    def _check_cookies(self, target: str, response) -> List[Dict[str, Any]]:
         """Check cookie security attributes."""
         findings = []
-        
-        if 'Set-Cookie' in headers:
-            cookies = headers.get_all('Set-Cookie') if hasattr(headers, 'get_all') else [headers.get('Set-Cookie')]
-            
-            for cookie in cookies:
-                if not cookie:
-                    continue
-                
-                cookie_lower = cookie.lower()
-                cookie_name = cookie.split('=')[0]
-                
-                # Check Secure flag (HTTPS sites only)
-                parsed = urlparse(target)
-                if parsed.scheme == 'https':
-                    if 'secure' not in cookie_lower:
-                        findings.append({
-                            'id': 'HEPH-HDR-401',
-                            'title': f'Cookie without Secure flag: {cookie_name}',
-                            'severity': 'medium',
-                            'confidence': 'high',
-                            'description': (
-                                f'Cookie "{cookie_name}" lacks Secure flag. '
-                                f'Cookies without Secure flag can be transmitted over HTTP, '
-                                f'allowing interception.'
-                            ),
-                            'evidence': {
-                                'type': 'header',
-                                'value': f'Set-Cookie: {cookie_name}=... [Secure missing]',
-                                'context': f'HTTP response from {target}'
-                            },
-                            'recommendation': 'Add Secure flag to all cookies on HTTPS sites',
-                        })
-                
-                # Check HttpOnly flag
-                if 'httponly' not in cookie_lower:
+        headers = response.headers
+
+        if 'Set-Cookie' not in headers:
+            return findings
+
+        # Use raw headers to get all Set-Cookie entries (requests merges duplicates)
+        if hasattr(response, 'raw') and hasattr(response.raw, 'headers') and hasattr(response.raw.headers, 'getlist'):
+            raw_cookies = response.raw.headers.getlist('Set-Cookie')
+        else:
+            raw_cookies = [headers.get('Set-Cookie', '')]
+
+        seen_names: set = set()
+        parsed = urlparse(target)
+        for cookie in raw_cookies:
+            if not cookie:
+                continue
+
+            cookie_lower = cookie.lower()
+            cookie_name = cookie.split('=')[0].strip()
+
+            # Skip duplicates (same name from redirect chain)
+            if cookie_name.lower() in seen_names:
+                continue
+            seen_names.add(cookie_name.lower())
+
+            # Check Secure flag (HTTPS sites only)
+            if parsed.scheme == 'https':
+                if 'secure' not in cookie_lower:
                     findings.append({
-                        'id': 'HEPH-HDR-402',
-                        'title': f'Cookie without HttpOnly flag: {cookie_name}',
+                        'id': 'HEPH-HDR-401',
+                        'title': f'Cookie without Secure flag: {cookie_name}',
                         'severity': 'medium',
                         'confidence': 'high',
                         'description': (
-                            f'Cookie "{cookie_name}" lacks HttpOnly flag. '
-                            f'Cookies without HttpOnly can be accessed via JavaScript, '
-                            f'enabling XSS-based cookie theft.'
+                            f'Cookie "{cookie_name}" lacks Secure flag. '
+                            f'Cookies without Secure flag can be transmitted over HTTP, '
+                            f'allowing interception.'
                         ),
                         'evidence': {
                             'type': 'header',
-                            'value': f'Set-Cookie: {cookie_name}=... [HttpOnly missing]',
+                            'value': f'Set-Cookie: {cookie_name}=... [Secure missing]',
                             'context': f'HTTP response from {target}'
                         },
-                        'recommendation': 'Add HttpOnly flag to prevent JavaScript access',
+                        'recommendation': 'Add Secure flag to all cookies on HTTPS sites',
                     })
-                
-                # Check SameSite attribute
-                if 'samesite' not in cookie_lower:
-                    findings.append({
-                        'id': 'HEPH-HDR-403',
-                        'title': f'Cookie without SameSite attribute: {cookie_name}',
-                        'severity': 'low',
-                        'confidence': 'high',
-                        'description': (
-                            f'Cookie "{cookie_name}" lacks SameSite attribute. '
-                            f'This makes the site vulnerable to CSRF attacks.'
-                        ),
-                        'evidence': {
-                            'type': 'header',
-                            'value': f'Set-Cookie: {cookie_name}=... [SameSite missing]',
-                            'context': f'HTTP response from {target}'
-                        },
-                        'recommendation': 'Add SameSite=Strict or SameSite=Lax attribute',
-                    })
-        
+
+            # Check HttpOnly flag
+            if 'httponly' not in cookie_lower:
+                findings.append({
+                    'id': 'HEPH-HDR-402',
+                    'title': f'Cookie without HttpOnly flag: {cookie_name}',
+                    'severity': 'medium',
+                    'confidence': 'high',
+                    'description': (
+                        f'Cookie "{cookie_name}" lacks HttpOnly flag. '
+                        f'Cookies without HttpOnly can be accessed via JavaScript, '
+                        f'enabling XSS-based cookie theft.'
+                    ),
+                    'evidence': {
+                        'type': 'header',
+                        'value': f'Set-Cookie: {cookie_name}=... [HttpOnly missing]',
+                        'context': f'HTTP response from {target}'
+                    },
+                    'recommendation': 'Add HttpOnly flag to prevent JavaScript access',
+                })
+
+            # Check SameSite attribute
+            if 'samesite' not in cookie_lower:
+                findings.append({
+                    'id': 'HEPH-HDR-403',
+                    'title': f'Cookie without SameSite attribute: {cookie_name}',
+                    'severity': 'low',
+                    'confidence': 'high',
+                    'description': (
+                        f'Cookie "{cookie_name}" lacks SameSite attribute. '
+                        f'This makes the site vulnerable to CSRF attacks.'
+                    ),
+                    'evidence': {
+                        'type': 'header',
+                        'value': f'Set-Cookie: {cookie_name}=... [SameSite missing]',
+                        'context': f'HTTP response from {target}'
+                    },
+                    'recommendation': 'Add SameSite=Strict or SameSite=Lax attribute',
+                })
+
         return findings
     
     def _check_deprecated_headers(self, target: str, headers: dict) -> List[Dict[str, Any]]:

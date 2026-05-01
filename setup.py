@@ -26,7 +26,7 @@ if requirements_path.exists():
 
 setup(
     name="hephaestus-server-forger",
-    version="0.1.0",
+    version="0.2.0",
     description="Server Security Auditor - Forge Secure Configurations",
     long_description=long_description,
     long_description_content_type="text/markdown",

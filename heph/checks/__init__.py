@@ -10,6 +10,14 @@ from .http_methods import HTTPMethodsChecker
 from .headers import SecurityHeadersChecker
 from .config import ConfigChecker
 from .tls import TLSChecker
+from .ports import PortScanner
+from .config_file import ConfigFileParser
+from .phpinfo import PhpinfoChecker
+from .cookies import CookieSecurityChecker
+from .cors import CORSChecker
+from .robots import RobotsChecker
+from .waf import WAFDetector
+from .api_discovery import APIDiscoveryChecker
 
 __all__ = [
     'ServerInfoChecker',
@@ -18,4 +26,12 @@ __all__ = [
     'SecurityHeadersChecker',
     'ConfigChecker',
     'TLSChecker',
+    'PortScanner',
+    'ConfigFileParser',
+    'PhpinfoChecker',
+    'CookieSecurityChecker',
+    'CORSChecker',
+    'RobotsChecker',
+    'WAFDetector',
+    'APIDiscoveryChecker',
 ]

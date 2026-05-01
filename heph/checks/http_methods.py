@@ -240,9 +240,6 @@ class HTTPMethodsChecker:
         """
         findings = []
         
-        # We won't actually delete anything, just see if DELETE is accepted
-        # (checking response code)
-        
         try:
             response = self.http_client.request(
                 'DELETE',
@@ -323,7 +320,8 @@ class HTTPMethodsChecker:
                     'references': [
                         'https://owasp.org/www-community/attacks/Cross_Site_Tracing',
                     ],
-                    'affected_component': 'HTTP TRACE'
+                    'affected_component': 'HTTP TRACE',
+                    'owasp': {'id': 'A05', 'name': 'Security Misconfiguration'},
                 })
         
         except requests.exceptions.RequestException as e:

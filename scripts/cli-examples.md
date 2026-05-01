@@ -15,15 +15,15 @@ heph --target http://localhost:8080
 # Scan a local Nginx server (tested ✅)
 heph --target http://localhost:8081
 
-# The tool runs in safe mode by default
-# Output: 21 findings on Apache, 13 on Nginx
+# The tool runs in safe mode by default across 13 scan phases
+# Output: ~42 findings on Apache, ~25 on Nginx
 ```
 
 **Expected output:**
 ```
-Scan completed in 21.34 seconds
-Summary: 6 critical, 2 high, 8 medium, 5 low, 0 info
-Report saved: ~/.hephaestus/reports/hephaestus_report_20241021_190156.json
+Scan completed in 31.47 seconds
+Summary: 8 critical, 7 high, 17 medium, 7 low, 3 info
+Report saved: ~/.hephaestus/reports/hephaestus_report_20260401_190156.json
 ```
 
 ---
@@ -191,7 +191,7 @@ echo $OPENAI_API_KEY
 # Basic AI analysis (tested ✅)
 heph --target http://localhost:8080 --use-ai
 
-# This uses GPT-4 Turbo by default
+# Default model: gpt-4o-mini-2024-07-18
 # Generates: Technical + Non-Technical reports
 ```
 
@@ -220,6 +220,74 @@ heph --target http://localhost:8080 \
   --ai-tone both
 ```
 
+### AI Streaming (`--ai-stream`)
+
+```bash
+# Stream tokens as they're generated (tested ✅)
+heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-stream \
+  --ai-tone technical
+```
+
+### AI Provider Comparison (`--ai-compare`)
+
+```bash
+# Compare two providers in parallel (tested ✅)
+heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-compare openai,anthropic \
+  --html
+
+# With explicit model versions (tested ✅)
+heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-compare openai:gpt-4o-mini-2024-07-18,anthropic:claude-3-5-haiku-20241022 \
+  --html
+```
+
+### AI Agent Mode (`--ai-agent`)
+
+```bash
+# Agent with live NVD CVE lookup (tested ✅)
+heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-agent \
+  --html \
+  -v
+
+# ⚠️ Agent mode makes additional API calls — consider --ai-budget
+```
+
+### AI Budget Cap (`--ai-budget`)
+
+```bash
+# Cap spending at $0.50 (tested ✅)
+heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-budget 0.50 \
+  --ai-tone both \
+  -v
+
+# Costs tracked in ~/.argos/costs.json
+```
+
+### AI Provider Selection (`--ai-provider`)
+
+```bash
+# Use Anthropic Claude instead of OpenAI (tested ✅)
+heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-provider anthropic \
+  --ai-model claude-3-5-haiku-20241022
+
+# Use local Ollama model (no API key needed)
+heph --target http://localhost:8080 \
+  --use-ai \
+  --ai-provider ollama \
+  --ai-model llama3.2
+```
+
 ### Complete AI Scan Example
 
 ```bash
@@ -229,14 +297,16 @@ export OPENAI_API_KEY="sk-proj-..."
 heph --target http://localhost:8080 \
   --use-ai \
   --ai-tone both \
+  --ai-budget 1.00 \
   --html \
   -v
 ```
 
 **Output includes:**
-- JSON report with AI analysis
+- JSON report with AI analysis and OWASP Top 10 mapping
 - HTML report with both technical and executive sections
-- Estimated cost: ~$0.05 per scan
+- AI cost entry in `~/.argos/costs.json`
+- Estimated cost: ~$0.18 per scan (medium report, 25 findings)
 
 ---
 
@@ -251,13 +321,13 @@ heph --target http://localhost:8080 --rate 5.0
 # Slower for unstable servers (tested ✅)
 heph --target http://localhost:8080 --rate 1.0
 
-# Default is 10.0 req/s
+# Default is 5.0 req/s (safe mode) / 12.0 req/s (aggressive mode)
 ```
 
 **Use cases:**
 - `--rate 1.0`: Slow/unstable servers
 - `--rate 5.0`: Production servers (recommended)
-- `--rate 10.0`: Default, safe for most cases
+- `--rate 12.0`: Max aggressive mode rate
 
 ### Timeout Configuration
 
@@ -297,7 +367,7 @@ heph --target http://localhost:8080 --threads 1
 heph --target http://localhost:8080 \
   --user-agent "MyScanner/1.0"
 
-# Default: "Hephaestus/0.1.0"
+# Default: "Hephaestus/0.2.0"
 ```
 
 ### Disable SSL Verification
@@ -307,6 +377,51 @@ heph --target http://localhost:8080 \
 heph --target https://localhost:8443 --no-verify-ssl
 
 # ⚠️ WARNING: Only use in development/testing!
+```
+
+### Diff Reports (`--diff`)
+
+```bash
+# Compare current scan against the last scan of the same target (tested ✅)
+heph --target http://localhost:8080 --diff last
+
+# Compare against a specific previous scan by ID
+heph --target http://localhost:8080 --diff 84
+
+# Diff output shows:
+# RESOLVED: findings that disappeared since last scan
+# NEW: findings that appeared since last scan
+# UNCHANGED: findings present in both scans
+```
+
+**Example diff output:**
+```
+Diff vs scan #84 (2026-04-01 18:30:12)
+──────────────────────────────────────────────
+RESOLVED  (2): HEPH-FILE-001 .env file exposed
+               COO-001 Cookie missing Secure flag
+NEW       (1): WAF-001 No WAF detected
+UNCHANGED (39): ...
+```
+
+### Offline Config File Parser (`--config-file`)
+
+```bash
+# Parse Apache httpd.conf offline (no HTTP requests) (tested ✅)
+heph --config-file /etc/apache2/apache2.conf
+
+# Parse Nginx nginx.conf offline (tested ✅)
+heph --config-file /etc/nginx/nginx.conf
+
+# Save results to HTML
+heph --config-file /path/to/httpd.conf --html
+
+# Expected findings from config analysis:
+# - ServerTokens Full → HIGH
+# - Options Indexes → MEDIUM (directory listing)
+# - ssl_protocols TLSv1 → HIGH
+# - expose_php On → HIGH
+# - display_errors On → HIGH
 ```
 
 ---
@@ -428,7 +543,7 @@ heph --target http://localhost:8080 --timeout 1
 heph --target http://localhost:8080 --html -v
 ```
 
-**Duration:** ~21 seconds for Apache, ~22 seconds for Nginx
+**Duration:** ~30-35 seconds for Apache, ~30-35 seconds for Nginx (13 scan phases)
 
 ### Full Security Audit
 
@@ -445,13 +560,18 @@ heph --verify-consent http \
   --domain example.com \
   --token verify-abc123
 
-# 4. Run full scan with AI
+# 4. Run full scan with AI, streaming enabled, budget cap
 export OPENAI_API_KEY="sk-proj-..."
 heph --target https://example.com \
   --use-ai \
   --ai-tone both \
+  --ai-stream \
+  --ai-budget 1.00 \
   --html \
   -vv
+
+# 5. Compare against last scan for regressions
+heph --target https://example.com --diff last
 ```
 
 ### Development Server Check
@@ -617,13 +737,14 @@ heph --target http://localhost:8080 \
 ```
 
 **Expected Results:**
-- **Duration:** ~21 seconds
-- **Findings:** 21 total (6 critical, 2 high, 8 medium, 5 low)
+- **Duration:** ~30-35 seconds (13 scan phases)
+- **Findings:** ~42 total (8 critical, 7 high, 17 medium, 7 low, 3 info)
 - **Critical findings:**
-  - Server version disclosure (HEPH-SRV-001)
-  - Directory listing enabled (HEPH-DIR-001)
-  - Missing security headers (HEPH-HDR-001-006)
-- **Reports:** JSON + HTML with AI analysis
+  - .env file exposed (HEPH-FILE-001)
+  - .git repository exposed (HEPH-FILE-002)
+  - phpinfo.php accessible + PHP-001 to PHP-004 (CRITICAL PHP settings)
+  - CORS allowing credentials with wildcard (COR-002)
+- **Reports:** JSON + HTML with AI analysis and OWASP Top 10 mapping
 
 ### Example 2: Nginx Server Scan
 
@@ -635,11 +756,11 @@ heph --target http://localhost:8081 \
 ```
 
 **Expected Results:**
-- **Duration:** ~22 seconds
-- **Findings:** 13 total (3 critical, 2 high, 5 medium, 3 low)
+- **Duration:** ~30-35 seconds (13 scan phases)
+- **Findings:** ~25 total (2 critical, 3 high, 12 medium, 6 low, 2 info)
 - **Critical findings:**
-  - Server version disclosure (HEPH-SRV-001)
-  - Missing security headers (HEPH-HDR-001-003)
+  - .env file exposed (HEPH-FILE-001)
+  - .git repository exposed (HEPH-FILE-002)
 
 ### Example 3: Quick Development Check
 
@@ -652,7 +773,7 @@ heph --target http://localhost:8080 \
 ```
 
 **Expected Results:**
-- **Duration:** ~15-18 seconds (faster with more threads)
+- **Duration:** ~20-25 seconds (faster with more threads, still runs all 13 phases)
 - **Output:** Minimal console output
 - **Report:** JSON only
 
@@ -690,7 +811,7 @@ heph -h
 # Show version (tested ✅)
 heph --version
 
-# Output: heph 0.1.0
+# Output: heph 0.2.0
 ```
 
 ### Verify Installation
@@ -702,7 +823,7 @@ which heph
 # Check Python module
 python -c "import heph; print(heph.__version__)"
 
-# Output: 0.1.0
+# Output: 0.2.0
 ```
 
 ---
@@ -714,32 +835,44 @@ python -c "import heph; print(heph.__version__)"
 ```json
 {
   "tool": "hephaestus",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scan_id": 81,
   "target": "http://localhost:8080",
-  "started_at": "2025-10-21T19:01:56",
-  "completed_at": "2025-10-21T19:02:17",
-  "duration": 21.34,
+  "started_at": "2026-04-01T19:01:56",
+  "completed_at": "2026-04-01T19:02:29",
+  "duration": 31.47,
   "summary": {
-    "critical": 6,
-    "high": 2,
-    "medium": 8,
-    "low": 5,
-    "info": 0
+    "critical": 8,
+    "high": 7,
+    "medium": 17,
+    "low": 7,
+    "info": 3
   },
   "findings": [
     {
-      "code": "HEPH-SRV-001",
+      "finding_code": "HEPH-SRV-001",
       "severity": "high",
       "title": "Apache server version disclosed",
       "description": "Server: Apache/2.4.62 (Debian)",
-      "remediation": "Add 'ServerTokens Prod' to Apache config"
+      "remediation": "Add 'ServerTokens Prod' to Apache config",
+      "owasp": {"id": "A05", "name": "Security Misconfiguration"},
+      "cvss": 5.3,
+      "vulnerabilities": []
     }
     // ... more findings
   ],
+  "diff": {
+    "resolved": [],
+    "new": [],
+    "unchanged": 42
+  },
   "ai_analysis": {
-    "technical": "...",
-    "non_technical": "..."
+    "executive_summary": "...",
+    "technical_remediation": "...",
+    "agent_analysis": null,
+    "compare_results": null,
+    "generated_at": "2026-04-01T19:02:45Z",
+    "model_used": "openai/gpt-4o-mini-2024-07-18"
   }
 }
 ```
@@ -811,6 +944,19 @@ heph --target http://localhost:8080 --use-ai
 heph --target http://localhost:8080 --use-ai --ai-tone technical
 heph --target http://localhost:8080 --use-ai --ai-tone non_technical
 heph --target http://localhost:8080 --use-ai --ai-tone both
+heph --target http://localhost:8080 --use-ai --ai-stream
+heph --target http://localhost:8080 --use-ai --ai-compare openai,anthropic
+heph --target http://localhost:8080 --use-ai --ai-agent
+heph --target http://localhost:8080 --use-ai --ai-budget 0.50
+heph --target http://localhost:8080 --use-ai --ai-provider anthropic --ai-model claude-3-5-haiku-20241022
+
+# Diff reports
+heph --target http://localhost:8080 --diff last
+heph --target http://localhost:8080 --diff 84
+
+# Offline config file parser
+heph --config-file /etc/apache2/apache2.conf
+heph --config-file /etc/nginx/nginx.conf --html
 
 # Advanced options
 heph --target http://localhost:8080 --rate 5.0

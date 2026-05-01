@@ -27,12 +27,29 @@ TraceEnable On
     Options +Indexes
     Require all granted
 </Directory>
+
+# VULNERABLE: CORS wildcard with credentials (for CORS testing)
+<Location /api>
+    Header always set Access-Control-Allow-Origin "*"
+    Header always set Access-Control-Allow-Credentials "true"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+</Location>
+
+# WAF SIMULATION: Cloudflare headers (for WAF detection testing — Phase 10)
+Header always set CF-Ray "7a8b9c0d1e2f3-IAD"
+Header always set CF-Cache-Status "DYNAMIC"
 APACHECONF
 
 # Configure vulnerable PHP
 cat >> /usr/local/etc/php/php.ini << 'PHPCONF'
 expose_php = On
 display_errors = On
+allow_url_fopen = On
+allow_url_include = On
+disable_functions =
+session.cookie_secure = Off
+session.cookie_httponly = Off
+upload_max_filesize = 200M
 PHPCONF
 
 # Generate SSL certificate
@@ -108,29 +125,44 @@ echo 'Info page - should not be public';
 ?>
 INFOPHP
 
-# Create index.html
-cat > /var/www/html/index.html << 'INDEXHTML'
+# Create index.php with CORS header + insecure cookie (for header/cookie testing)
+cat > /var/www/html/index.php << 'INDEXPHP'
+<?php
+// VULNERABLE: CORS wildcard on all pages
+header('Access-Control-Allow-Origin: *');
+// VULNERABLE: Session cookie without security flags
+setcookie('session_id', 'abc123def456', 0, '/', '', false, false);
+setcookie('user_token', 'tok_xyz789', 0, '/', '', false, false);
+setcookie('laravel_session', 'eyJpdiI6InRlc3QifQ', 0, '/', '', false, false);
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Vulnerable Apache Server</title>
 </head>
 <body>
-    <h1>🔨 Hephaestus Test Lab - Apache</h1>
+    <h1>&#128296; Hephaestus Test Lab - Apache</h1>
     <p>Intentionally vulnerable server for testing Hephaestus scanner</p>
     <ul>
         <li>Server version disclosed in headers</li>
         <li>PHP version disclosed in headers</li>
         <li>.env file exposed at /.env</li>
-        <li>phpinfo.php accessible</li>
+        <li>phpinfo.php accessible with dangerous settings</li>
         <li>.git directory exposed</li>
         <li>Directory listing enabled in /uploads/</li>
         <li>Weak TLS configuration</li>
         <li>Missing security headers</li>
+        <li>CORS wildcard header set</li>
+        <li>Session cookies without security flags</li>
+        <li>robots.txt exposes sensitive paths</li>
+        <li>/api/v1/ and /swagger.json accessible</li>
     </ul>
 </body>
 </html>
-INDEXHTML
+INDEXPHP
+
+# Remove old index.html if it exists
+rm -f /var/www/html/index.html
 
 # Create uploads directory with files
 mkdir -p /var/www/html/uploads
@@ -154,14 +186,76 @@ GITCONFIG
 # Create .well-known directory for consent tokens
 mkdir -p /var/www/html/.well-known
 
+# VULNERABLE: robots.txt with sensitive disallowed paths
+cat > /var/www/html/robots.txt << 'ROBOTSTXT'
+User-agent: *
+Disallow: /admin/
+Disallow: /backup/
+Disallow: /config/
+Disallow: /api/
+Disallow: /internal/
+Disallow: /database/
+Disallow: /.git/
+Disallow: /phpmyadmin/
+Disallow: /staging/
+Disallow: /private/
+ROBOTSTXT
+
+# Create /backup/ directory that is ACCESSIBLE (robots.txt says disallow but no auth)
+mkdir -p /var/www/html/backup
+echo "DB_PASS=SuperSecret123" > /var/www/html/backup/db.conf
+echo "backup_2024.sql dump here" > /var/www/html/backup/database_dump.sql
+
+# Create /api/v1/ endpoint (JSON)
+mkdir -p /var/www/html/api/v1
+cat > /var/www/html/api/v1/users.json << 'APIUSERS'
+{"users": [{"id": 1, "name": "admin", "email": "admin@example.com", "role": "administrator"}]}
+APIUSERS
+
+cat > /var/www/html/api/v1/index.php << 'APIINDEX'
+<?php
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+echo json_encode(["version" => "1.0", "endpoints" => ["/users", "/products", "/orders"]]);
+APIINDEX
+
+# Create /swagger.json (exposed API spec)
+cat > /var/www/html/swagger.json << 'SWAGGERJSON'
+{
+  "openapi": "3.0.0",
+  "info": {"title": "VulnerableApp API", "version": "1.0.0"},
+  "paths": {
+    "/api/v1/users": {"get": {"summary": "List users", "responses": {"200": {"description": "OK"}}}},
+    "/api/v1/admin": {"get": {"summary": "Admin endpoint", "responses": {"200": {"description": "OK"}}}},
+    "/api/v1/config": {"get": {"summary": "Config dump", "responses": {"200": {"description": "OK"}}}}
+  }
+}
+SWAGGERJSON
+
+# Create /admin/ directory (blocked 403 — robots says disallow and access IS blocked)
+mkdir -p /var/www/html/admin
+cat >> /etc/apache2/apache2.conf << 'ADMINCONF'
+<Directory /var/www/html/admin>
+    Require all denied
+</Directory>
+ADMINCONF
+
 echo "✅ Vulnerable Apache server configured successfully!"
-echo "🔓 Vulnerabilities ready for testing:"
+echo "Vulnerabilities ready for testing:"
 echo "   - .env file at /.env"
-echo "   - phpinfo.php at /phpinfo.php"
+echo "   - phpinfo.php at /phpinfo.php (with display_errors=On, allow_url_fopen=On)"
 echo "   - .git directory at /.git/"
 echo "   - Directory listing at /uploads/"
 echo "   - Server version in headers"
 echo "   - Weak TLS configuration"
+echo "   - CORS wildcard + credentials at /api/"
+echo "   - WAF simulation: Cloudflare CF-Ray + CF-Cache-Status headers"
+echo "   - Session cookies without Secure/HttpOnly flags"
+echo "   - robots.txt with 10 sensitive Disallow paths"
+echo "   - /backup/ accessible (despite robots.txt)"
+echo "   - /admin/ blocked (403)"
+echo "   - /swagger.json exposed"
+echo "   - /api/v1/ returning JSON"
 
 # Start Apache
 exec apache2-foreground

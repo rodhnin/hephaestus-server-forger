@@ -19,6 +19,7 @@ from .core.config import get_config
 from .core.db import get_db
 from .core.report import ReportGenerator
 from .core.ai import analyze_report
+from .core.diff import compute_diff
 from .core.http_client import create_http_client
 
 from .checks.server_info import ServerInfoChecker
@@ -27,6 +28,13 @@ from .checks.http_methods import HTTPMethodsChecker
 from .checks.headers import SecurityHeadersChecker
 from .checks.config import ConfigChecker
 from .checks.tls import TLSChecker
+from .checks.ports import PortScanner
+from .checks.phpinfo import PhpinfoChecker
+from .checks.cookies import CookieSecurityChecker
+from .checks.cors import CORSChecker
+from .checks.robots import RobotsChecker
+from .checks.waf import WAFDetector
+from .checks.api_discovery import APIDiscoveryChecker
 
 logger = get_logger(__name__)
 
@@ -49,7 +57,10 @@ class ServerScanner:
         target: str,
         mode: str = 'safe',
         use_ai: bool = False,
-        ai_tone: str = 'both'
+        ai_tone: str = 'both',
+        ai_compare: Optional[list] = None,
+        ai_agent: bool = False,
+        diff_ref: Optional[str] = None,
     ) -> Dict:
         """
         Execute full server security scan with parallelized phases.
@@ -59,7 +70,10 @@ class ServerScanner:
             mode: 'safe' (non-intrusive) or 'aggressive' (requires consent)
             use_ai: Enable AI analysis
             ai_tone: 'technical', 'non_technical', or 'both'
-        
+            ai_compare: List of {provider, model} dicts for multi-LLM compare (IMPROV-007)
+            ai_agent: Use agent mode with external tools (IMPROV-008)
+            diff_ref: Scan ID or 'last' for diff comparison (IMPROV-004)
+
         Returns:
             Scan results dictionary with report path
         """
@@ -75,6 +89,13 @@ class ServerScanner:
         logger.info(f"Starting Hephaestus scan: {target}")
         logger.info(f"Mode: {mode.upper()}")
         logger.info(f"AI Analysis: {'Enabled' if use_ai else 'Disabled'}")
+        if ai_compare:
+            providers_str = [f"{p['provider']}/{p['model']}" for p in ai_compare]
+            logger.info(f"AI Compare Mode: {providers_str}")
+        if ai_agent:
+            logger.info("AI Agent Mode: Enabled (NVD + server vuln lookup)")
+        if diff_ref:
+            logger.info(f"Diff comparison: vs {diff_ref}")
         logger.info(f"=" * 70)
         
         # Create HTTP client with rate limiting
@@ -87,6 +108,14 @@ class ServerScanner:
         self.headers = SecurityHeadersChecker(self.config, http_client)
         self.directory_listing = ConfigChecker(self.config, http_client)
         self.tls = TLSChecker(self.config, http_client)
+        self.ports = PortScanner(self.config)
+        # Bloque 2 checkers
+        self.phpinfo = PhpinfoChecker(self.config, http_client, mode)
+        self.cookies = CookieSecurityChecker(self.config, http_client, mode)
+        self.cors = CORSChecker(self.config, http_client, mode)
+        self.robots = RobotsChecker(self.config, http_client, mode)
+        self.waf = WAFDetector(self.config, http_client, mode)
+        self.api = APIDiscoveryChecker(self.config, http_client, mode)
         
         # Verify consent for aggressive/AI modes
         if mode == 'aggressive' or use_ai:
@@ -120,7 +149,7 @@ class ServerScanner:
             # ============================================================
             # Phase 1: Server Information (MUST RUN FIRST - Connectivity Check)
             # ============================================================
-            logger.info("\n[Phase 1/6] Server Information Gathering...")
+            logger.info("\n[Phase 1/13] Server Information Gathering...")
             
             try:
                 server_findings = self.server_info.scan(target)
@@ -134,10 +163,10 @@ class ServerScanner:
                 )
             
             # ============================================================
-            # Phases 2-6: Run in PARALLEL using ThreadPoolExecutor
+            # Phases 2-13: Run in PARALLEL using ThreadPoolExecutor
             # ============================================================
-            logger.info("\n[Phases 2-6] Running parallel security checks...")
-            logger.info("(Files, Methods, Headers, Config, TLS)")
+            logger.info("\n[Phases 2-13] Running parallel security checks...")
+            logger.info("(Files, Methods, Headers, Config, TLS, Ports, CORS, Robots, WAF, API, Cookies, phpinfo)")
             
             # Run phases in parallel
             parallel_results = self._run_phases_parallel(target)
@@ -152,7 +181,9 @@ class ServerScanner:
             result = self._finalize_scan(
                 scan_id, all_findings, start_time, requests_count,
                 status='completed', target=target, mode=mode,
-                use_ai=use_ai, ai_tone=ai_tone
+                use_ai=use_ai, ai_tone=ai_tone,
+                ai_compare=ai_compare, ai_agent=ai_agent,
+                diff_ref=diff_ref, domain=domain
             )
             
             logger.info("\n" + "=" * 70)
@@ -203,7 +234,7 @@ class ServerScanner:
     
     def _run_phases_parallel(self, target: str) -> List[Tuple[str, List[Dict], int]]:
         """
-        Run phases 2-6 in parallel using ThreadPoolExecutor.
+        Run phases 2-13 in parallel using ThreadPoolExecutor.
         
         Args:
             target: Target URL
@@ -218,13 +249,23 @@ class ServerScanner:
             ('Phase 4: Headers', self._run_headers_phase, target),
             ('Phase 5: Config', self._run_config_phase, target),
             ('Phase 6: TLS', self._run_tls_phase, target),
+            ('Phase 8: CORS', self._run_cors_phase, target),
+            ('Phase 9: Robots', self._run_robots_phase, target),
+            ('Phase 10: WAF', self._run_waf_phase, target),
+            ('Phase 11: API', self._run_api_phase, target),
+            ('Phase 12: Cookies', self._run_cookies_phase, target),
+            ('Phase 13: phpinfo', self._run_phpinfo_phase, target),
         ]
-        
+
+        # Add port scan phase if enabled
+        if getattr(self.config, 'port_scan_enabled', True):
+            phases.append(('Phase 7: Ports', self._run_ports_phase, target))
+
         results = []
-        
+
         # Use ThreadPoolExecutor to run phases in parallel
-        # Max workers = min(5 phases, config.max_workers)
-        max_workers = min(5, self.config.max_workers)
+        # Max workers = min(number of phases, config.max_workers)
+        max_workers = min(len(phases), self.config.max_workers)
         
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all phases
@@ -279,6 +320,12 @@ class ServerScanner:
         )
         return findings, requests
     
+    def _run_ports_phase(self, target: str) -> Tuple[List[Dict], int]:
+        """Phase 7: Port Scanning & Backend Service Detection"""
+        logger.debug("Running port scan phase...")
+        findings = self.ports.scan(target)
+        return findings, len(getattr(self.config, 'port_scan_ports', []))
+
     def _run_tls_phase(self, target: str) -> Tuple[List[Dict], int]:
         """Phase 6: TLS/SSL Configuration"""
         logger.debug("Running TLS phase...")
@@ -309,6 +356,42 @@ class ServerScanner:
         
         return findings, requests
     
+    def _run_cors_phase(self, target: str) -> Tuple[List[Dict], int]:
+        """Phase 8: CORS Misconfiguration"""
+        logger.debug("Running CORS phase...")
+        findings = self.cors.scan(target)
+        return findings, 4
+
+    def _run_robots_phase(self, target: str) -> Tuple[List[Dict], int]:
+        """Phase 9: Robots.txt Analysis"""
+        logger.debug("Running robots phase...")
+        findings = self.robots.scan(target)
+        return findings, 1
+
+    def _run_waf_phase(self, target: str) -> Tuple[List[Dict], int]:
+        """Phase 10: WAF Detection"""
+        logger.debug("Running WAF detection phase...")
+        findings = self.waf.scan(target)
+        return findings, 2
+
+    def _run_api_phase(self, target: str) -> Tuple[List[Dict], int]:
+        """Phase 11: API Discovery"""
+        logger.debug("Running API discovery phase...")
+        findings = self.api.scan(target)
+        return findings, len(findings) + 5
+
+    def _run_cookies_phase(self, target: str) -> Tuple[List[Dict], int]:
+        """Phase 12: Cookie Security (multi-endpoint)"""
+        logger.debug("Running cookie security phase...")
+        findings = self.cookies.scan(target)
+        return findings, 7
+
+    def _run_phpinfo_phase(self, target: str) -> Tuple[List[Dict], int]:
+        """Phase 13: phpinfo() Deep Analysis"""
+        logger.debug("Running phpinfo phase...")
+        findings = self.phpinfo.scan(target)
+        return findings, 4
+
     def _handle_connection_error(
         self,
         error: requests.exceptions.RequestException,
@@ -407,7 +490,11 @@ class ServerScanner:
         target: str,
         mode: str,
         use_ai: bool = False,
-        ai_tone: Optional[str] = None
+        ai_tone: Optional[str] = None,
+        ai_compare: Optional[list] = None,
+        ai_agent: bool = False,
+        diff_ref: Optional[str] = None,
+        domain: Optional[str] = None,
     ) -> Dict:
         """
         Generate reports, save to DB, and optionally run AI analysis.
@@ -422,14 +509,19 @@ class ServerScanner:
             mode: Scan mode
             use_ai: Whether to run AI analysis
             ai_tone: AI tone (technical/non_technical/both)
-        
+            ai_compare: Multi-LLM compare providers list
+            ai_agent: Use agent mode
+            diff_ref: Diff reference scan ID or 'last'
+            domain: Target domain (pre-parsed)
+
         Returns:
             Result summary dictionary
         """
         duration = time.time() - start_time
-        
+
         # Get consent info if available
-        domain = urlparse(target).netloc
+        if not domain:
+            domain = urlparse(target).netloc
         consent_info = None
         
         if mode == 'aggressive' or use_ai:
@@ -442,7 +534,7 @@ class ServerScanner:
                     'verified_at': latest['verified_at']
                 }
         
-        # Create report
+        # Create report (diff and ai_analysis will be added after)
         report = self.report_gen.create_report(
             tool='hephaestus',
             target=target,
@@ -452,18 +544,55 @@ class ServerScanner:
             requests_sent=requests_count,
             consent=consent_info
         )
-        
+
+        # Save findings to database FIRST — required before compute_diff() queries them
+        for finding in findings:
+            self.db.add_finding(
+                scan_id=scan_id,
+                finding_code=finding['id'],
+                title=finding['title'],
+                severity=finding['severity'],
+                confidence=finding['confidence'],
+                recommendation=finding['recommendation'],
+                evidence_type=finding.get('evidence', {}).get('type'),
+                evidence_value=finding.get('evidence', {}).get('value'),
+                references=finding.get('references')
+            )
+
+        # Compute diff if requested (findings already in DB at this point)
+        if diff_ref:
+            logger.info(f"\n[Diff] Comparing vs {diff_ref}...")
+            try:
+                diff_result = compute_diff(self.db, scan_id, diff_ref, domain)
+                if diff_result:
+                    report['diff'] = diff_result
+                    logger.info(
+                        f"✓ Diff computed: {len(diff_result.get('new', []))} new, "
+                        f"{len(diff_result.get('fixed', []))} fixed, "
+                        f"{len(diff_result.get('persisting', []))} persisting"
+                    )
+                else:
+                    logger.warning("Diff skipped (no reference scan found)")
+            except Exception as e:
+                logger.error(f"Diff computation failed: {e}")
+
         # Run AI analysis if enabled (BEFORE saving reports)
         if use_ai:
             logger.info("\n[AI Analysis] Generating insights...")
             try:
-                ai_analysis = analyze_report(report, tone=ai_tone, config=self.config)
-                
+                ai_analysis = analyze_report(
+                    report,
+                    tone=ai_tone,
+                    config=self.config,
+                    scan_id=scan_id,
+                    compare_providers=ai_compare,
+                    use_agent=ai_agent,
+                )
+
                 if ai_analysis:
-                    # Add AI analysis to report dict
                     report['ai_analysis'] = ai_analysis
                     logger.info("✓ AI analysis completed")
-            
+
             except Exception as e:
                 logger.error(f"AI analysis failed: {e}")
         
@@ -477,20 +606,6 @@ class ServerScanner:
                 html_path = self.report_gen.generate_html(report, json_path)
             except Exception as e:
                 logger.warning(f"HTML generation failed: {e}")
-        
-        # Save findings to database
-        for finding in findings:
-            self.db.add_finding(
-                scan_id=scan_id,
-                finding_code=finding['id'],
-                title=finding['title'],
-                severity=finding['severity'],
-                confidence=finding['confidence'],
-                recommendation=finding['recommendation'],
-                evidence_type=finding.get('evidence', {}).get('type'),
-                evidence_value=finding.get('evidence', {}).get('value'),
-                references=finding.get('references')
-            )
         
         # Get summary from report
         summary = report['summary']

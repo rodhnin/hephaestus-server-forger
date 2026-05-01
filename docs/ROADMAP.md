@@ -1,116 +1,125 @@
 # Hephaestus Development Roadmap
 
-## Current Version: v0.1.0 ✅ RELEASED
+## Current Version: v0.2.0 ✅ RELEASED
 
-**Release Date:** January 2026  
+**Release Date:** April 2026
 **Status:** ✅ **PRODUCTION READY**
+
+---
+
+## v0.1.0 ✅ RELEASED
+
+**Release Date:** January 2026
+**Status:** ✅ **PRODUCTION READY** (superseded by v0.2.0)
 
 ### Features Included
 
 #### Core Scanning
 
--   ✅ **Server Fingerprinting**: Multi-method detection (Apache, Nginx, IIS) via headers, error pages, and behavior analysis
--   ✅ **Sensitive File Detection**: 70+ critical paths including:
-    -   Environment files (`.env`, `.env.local`, `.env.production`)
-    -   Configuration backups (`httpd.conf.bak`, `nginx.conf.old`, `.htaccess~`)
-    -   Version control (`.git/`, `.svn/`, `.hg/`)
-    -   Database credentials (`database.yml`, `config.php`)
-    -   Server status pages (`server-status`, `server-info`, `nginx_status`)
-    -   PHP information (`phpinfo.php`, `info.php`)
-    -   Development artifacts (`composer.json`, `package.json`, `.idea/`)
--   ✅ **HTTP Methods Testing**: Detection of unsafe methods (PUT, DELETE, TRACE, OPTIONS) and XST vulnerability
--   ✅ **Security Headers Analysis**: Comprehensive evaluation of 6 critical headers:
-    -   HSTS (HTTP Strict Transport Security)
-    -   CSP (Content Security Policy)
-    -   X-Frame-Options (Clickjacking protection)
-    -   X-Content-Type-Options (MIME sniffing prevention)
-    -   Referrer-Policy (Referrer leakage control)
-    -   Permissions-Policy (Feature policy enforcement)
--   ✅ **TLS/SSL Configuration**: Protocol versions, cipher suites, certificate validity checks
--   ✅ **Directory Listing Detection**: Apache `Indexes` and Nginx `autoindex` misconfiguration identification
+- ✅ **Server Fingerprinting**: Multi-method detection (Apache, Nginx, IIS) via headers, error pages, and behavior analysis
+- ✅ **Sensitive File Detection**: 70+ critical paths including:
+    - Environment files (`.env`, `.env.local`, `.env.production`)
+    - Configuration backups (`httpd.conf.bak`, `nginx.conf.old`, `.htaccess~`)
+    - Version control (`.git/`, `.svn/`, `.hg/`)
+    - Database credentials (`database.yml`, `config.php`)
+    - Server status pages (`server-status`, `server-info`, `nginx_status`)
+    - PHP information (`phpinfo.php`, `info.php`)
+    - Development artifacts (`composer.json`, `package.json`, `.idea/`)
+- ✅ **HTTP Methods Testing**: Detection of unsafe methods (PUT, DELETE, TRACE, OPTIONS) and XST vulnerability
+- ✅ **Security Headers Analysis**: Comprehensive evaluation of 6 critical headers:
+    - HSTS (HTTP Strict Transport Security)
+    - CSP (Content Security Policy)
+    - X-Frame-Options (Clickjacking protection)
+    - X-Content-Type-Options (MIME sniffing prevention)
+    - Referrer-Policy (Referrer leakage control)
+    - Permissions-Policy (Feature policy enforcement)
+- ✅ **TLS/SSL Configuration**: Protocol versions, cipher suites, certificate validity checks
+- ✅ **Directory Listing Detection**: Apache `Indexes` and Nginx `autoindex` misconfiguration identification
 
 #### Performance & Control
 
--   ✅ **Rate Limiting**: Configurable request throttling (1-10 req/s) with thread-safe implementation
--   ✅ **Thread Pool Management**: Concurrent scanning with 1-20 worker threads
--   ✅ **Intelligent Retry Logic**: Exponential backoff on transient failures
--   ✅ **Graceful Degradation**: Continues scanning even if modules fail
+- ✅ **Rate Limiting**: Configurable request throttling (1-10 req/s) with thread-safe implementation
+- ✅ **Thread Pool Management**: Concurrent scanning with 1-20 worker threads
+- ✅ **Intelligent Retry Logic**: Exponential backoff on transient failures
+- ✅ **Graceful Degradation**: Continues scanning even if modules fail
 
 #### Infrastructure
 
--   ✅ **Consent Token System**: Ethical scanning with HTTP/.well-known or DNS TXT verification
--   ✅ **Shared SQLite Database**: `~/.argos/argos.db` for cross-tool integration (Argus, Pythia, future tools)
--   ✅ **Dual Reporting**: JSON (machine-readable) and HTML (human-readable) formats
--   ✅ **Professional HTML Reports**: Forge-themed (⚒️ blacksmith aesthetic), responsive, self-contained
--   ✅ **Automatic Secret Redaction**: Logging system prevents credential leaks
--   ✅ **Multi-Source Configuration**: YAML defaults + environment variables + CLI overrides
--   ✅ **Docker Support**: Production-ready containerized scanning + vulnerable test labs
+- ✅ **Consent Token System**: Ethical scanning with HTTP/.well-known or DNS TXT verification
+- ✅ **Shared SQLite Database**: `~/.argos/argos.db` for cross-tool integration (Argus, Pythia, future tools)
+- ✅ **Dual Reporting**: JSON (machine-readable) and HTML (human-readable) formats
+- ✅ **Professional HTML Reports**: Forge-themed (⚒️ blacksmith aesthetic), responsive, self-contained
+- ✅ **Automatic Secret Redaction**: Logging system prevents credential leaks
+- ✅ **Multi-Source Configuration**: YAML defaults + environment variables + CLI overrides
+- ✅ **Docker Support**: Production-ready containerized scanning + vulnerable test labs
 
 #### AI-Powered Analysis (3 Providers)
 
--   ✅ **OpenAI GPT-4 Turbo**: Premium quality analysis (~35s, $0.25/scan)
--   ✅ **Anthropic Claude**: Privacy-focused alternative (~45s, $0.30/scan)
--   ✅ **Ollama (Local Models)**: 100% offline analysis (free, 28min CPU / 75s GPU)
--   ✅ **Technical Hardening Guides**: Apache/Nginx config snippets, CLI commands, step-by-step instructions
--   ✅ **Executive Risk Summaries**: Business-friendly language for stakeholders
--   ✅ **Dual-Tone Mode**: Both technical and executive analysis in single report
--   ✅ **Automatic Sanitization**: Zero secrets leaked to AI providers (consent tokens, API keys, certificates removed)
+- ✅ **OpenAI GPT-4 Turbo**: Premium quality analysis (~35s, $0.25/scan)
+- ✅ **Anthropic Claude**: Privacy-focused alternative (~45s, $0.30/scan)
+- ✅ **Ollama (Local Models)**: 100% offline analysis (free, 28min CPU / 75s GPU)
+- ✅ **Technical Hardening Guides**: Apache/Nginx config snippets, CLI commands, step-by-step instructions
+- ✅ **Executive Risk Summaries**: Business-friendly language for stakeholders
+- ✅ **Dual-Tone Mode**: Both technical and executive analysis in single report
+- ✅ **Automatic Sanitization**: Zero secrets leaked to AI providers (consent tokens, API keys, certificates removed)
 
 #### Resilience & Error Handling
 
--   ✅ **Connection Error Recovery**: Handles timeouts, DNS failures, refused connections
--   ✅ **Database Corruption Recovery**: Automatic backup and recreation
--   ✅ **Permission Handling**: Graceful degradation for read-only directories
--   ✅ **Partial Scan Support**: Preserves results even if target goes offline mid-scan
--   ✅ **Standardized Exit Codes**: 0=success, 1=error, 2=invalid-target, 130=cancelled
+- ✅ **Connection Error Recovery**: Handles timeouts, DNS failures, refused connections
+- ✅ **Database Corruption Recovery**: Automatic backup and recreation
+- ✅ **Permission Handling**: Graceful degradation for read-only directories
+- ✅ **Partial Scan Support**: Preserves results even if target goes offline mid-scan
+- ✅ **Standardized Exit Codes**: 0=success, 1=error, 2=invalid-target, 130=cancelled
 
 #### Developer Experience
 
--   ✅ **Rich CLI Interface**: Colored output, progress tracking, ASCII art branding (forge/blacksmith theme)
--   ✅ **Verbosity Levels**: `-v` (INFO), `-vv` (DEBUG), `-vvv` (TRACE) for troubleshooting
--   ✅ **Comprehensive Help**: Built-in documentation with examples
--   ✅ **Flexible Deployment**: Native Python, Docker, or containerized scanning
--   ✅ **Safe Testing Labs**: Docker Compose environments for Apache & Nginx with 34 planted vulnerabilities
+- ✅ **Rich CLI Interface**: Colored output, progress tracking, ASCII art branding (forge/blacksmith theme)
+- ✅ **Verbosity Levels**: `-v` (INFO), `-vv` (DEBUG), `-vvv` (TRACE) for troubleshooting
+- ✅ **Comprehensive Help**: Built-in documentation with examples
+- ✅ **Flexible Deployment**: Native Python, Docker, or containerized scanning
+- ✅ **Safe Testing Labs**: Docker Compose environments for Apache & Nginx with 34 planted vulnerabilities
 
 ### Performance Benchmarks (v0.1.0)
 
--   **Scan Duration**: 21-22 seconds (safe mode, local Docker lab)
--   **Database Efficiency**: 671 KB for 80 scans and 1,159+ findings
--   **Query Performance**: 5-50ms for complex aggregations
--   **Concurrent Scanning**: 3+ simultaneous scans without race conditions
--   **Scalability**: Tested up to 80+ scans with linear performance
+- **Scan Duration**: 21-22 seconds (safe mode, local Docker lab, 6 phases)
+- **Database Efficiency**: 671 KB for 80 scans and 1,159+ findings
+- **Query Performance**: 5-50ms for complex aggregations
+- **Concurrent Scanning**: 3+ simultaneous scans without race conditions
+- **Scalability**: Tested up to 80+ scans with linear performance
 
 ### Validation & Testing
 
--   ✅ **55 Validation Tests**: 10 comprehensive phases covering all functionality
--   ✅ **Empirical Accuracy**: 100% precision (zero false positives), 100% recall (zero false negatives)
--   ✅ **Controlled Labs**: Apache lab (21 findings), Nginx lab (13 findings) for reproducible testing
--   ✅ **F1-Score**: 1.0 (perfect balance between precision and recall)
+- ✅ **55 Validation Tests**: 10 comprehensive phases covering all functionality
+- ✅ **Empirical Accuracy**: 100% precision (zero false positives), 100% recall (zero false negatives)
+- ✅ **Controlled Labs**: Apache lab (21 findings), Nginx lab (13 findings) for reproducible testing (v0.1.0 baseline)
+- ✅ **F1-Score**: 1.0 (perfect balance between precision and recall)
 
 ---
 
-## v0.2.0 - Enhanced Detection & AI Features
+## v0.2.0 ✅ RELEASED — Enhanced Detection & AI Features
 
-**Theme:** Deep Server Analysis + Advanced AI Capabilities  
-**Target Release:** Q2 2026 (April-May)  
+**Theme:** Deep Server Analysis + Advanced AI Capabilities
+**Release Date:** April 2026
+**Status:** ✅ **PRODUCTION READY**
 **Focus:** Detection accuracy, AI enhancements, reporting improvements
 
 ---
 
-### 🔍 Deep TLS/SSL Analysis
+### ✅ 🔍 Deep TLS/SSL Analysis
 
-**Ticket:** IMPROV-002  
+**Ticket:** IMPROV-002
 **Priority:** High
+**Status:** ✅ DONE
 
 #### Current Limitations
 
 Basic TLS checks only verify:
 
--   Protocol availability (TLS enabled/disabled)
--   Basic protocol version (SSLv3, TLS 1.0 = weak)
--   No cipher suite analysis
--   No certificate chain validation
--   No OCSP/CRL checking
+- Protocol availability (TLS enabled/disabled)
+- Basic protocol version (SSLv3, TLS 1.0 = weak)
+- No cipher suite analysis
+- No certificate chain validation
+- No OCSP/CRL checking
 
 #### Planned Enhancements
 
@@ -218,26 +227,27 @@ python -m heph --target https://example.com --check-tls
 
 **Benefits:**
 
--   SSL Labs-grade scoring (A+, A, B, C, D, F)
--   CVE correlation for TLS vulnerabilities
--   Actionable remediation (specific cipher strings)
--   Certificate lifecycle management
+- SSL Labs-grade scoring (A+, A, B, C, D, F)
+- CVE correlation for TLS vulnerabilities
+- Actionable remediation (specific cipher strings)
+- Certificate lifecycle management
 
 ---
 
-### 🌐 Server Module & Framework Detection
+### ✅ 🌐 Server Module & Framework Detection
 
-**Ticket:** IMPROV-003  
+**Ticket:** IMPROV-003
 **Priority:** High
+**Status:** ✅ DONE
 
 #### Current Limitations
 
 Only detects base server (Apache, Nginx, IIS). No detection of:
 
--   Server modules (mod_security, mod_rewrite, ngx_http_gzip)
--   Web frameworks (Laravel, Django, Express.js, Rails)
--   Application servers (Tomcat, Gunicorn, uWSGI)
--   Reverse proxy configurations
+- Server modules (mod_security, mod_rewrite, ngx_http_gzip)
+- Web frameworks (Laravel, Django, Express.js, Rails)
+- Application servers (Tomcat, Gunicorn, uWSGI)
+- Reverse proxy configurations
 
 #### Detection Methods
 
@@ -381,25 +391,26 @@ X-Cache-Status: MISS
 
 **Benefits:**
 
--   Context-aware recommendations (framework-specific hardening)
--   WAF detection (ModSecurity, Cloudflare WAF)
--   Reverse proxy identification (attack surface mapping)
--   Technology stack profiling
+- Context-aware recommendations (framework-specific hardening)
+- WAF detection (ModSecurity, Cloudflare WAF)
+- Reverse proxy identification (attack surface mapping)
+- Technology stack profiling
 
 ---
 
-### 📊 Enhanced HTML Reporting
+### ✅ 📊 Enhanced HTML Reporting
 
-**Ticket:** IMPROV-004  
+**Ticket:** IMPROV-004
 **Priority:** High
+**Status:** ✅ DONE
 
 #### Current Limitations
 
--   No CVE/CWE badges for findings
--   Security headers shown without configuration examples
--   No finding grouping or filtering
--   References lack metadata
--   No interactive elements (collapsible sections)
+- No CVE/CWE badges for findings
+- Security headers shown without configuration examples
+- No finding grouping or filtering
+- References lack metadata
+- No interactive elements (collapsible sections)
 
 #### Planned Improvements
 
@@ -536,17 +547,18 @@ Date: Mon, 21 Oct 2024 12:30:45 GMT
 
 **Benefits:**
 
--   Copy-paste ready configurations (reduce remediation time)
--   Visual organization (easier to prioritize)
--   Interactive filtering (focus on critical issues)
--   Enhanced credibility (authoritative references)
+- Copy-paste ready configurations (reduce remediation time)
+- Visual organization (easier to prioritize)
+- Interactive filtering (focus on critical issues)
+- Enhanced credibility (authoritative references)
 
 ---
 
-### 🔧 Apache/Nginx Configuration File Parser
+### ✅ 🔧 Apache/Nginx Configuration File Parser
 
-**Ticket:** IMPROV-005  
+**Ticket:** IMPROV-005
 **Priority:** Medium
+**Status:** ✅ DONE
 
 #### Vision
 
@@ -653,17 +665,18 @@ python -m heph --config-file httpd.conf --benchmark cis-apache-2.4
 
 **Benefits:**
 
--   Pre-deployment security (catch issues before going live)
--   No server access required (offline analysis)
--   Compliance validation (CIS, NIST, OWASP)
--   Educational tool (learn secure configurations)
+- Pre-deployment security (catch issues before going live)
+- No server access required (offline analysis)
+- Compliance validation (CIS, NIST, OWASP)
+- Educational tool (learn secure configurations)
 
 ---
 
-### 💰 AI Cost Tracking & Budget Limits
+### ✅ 💰 AI Cost Tracking & Budget Limits
 
-**Ticket:** IMPROV-006  
+**Ticket:** IMPROV-006
 **Priority:** Medium
+**Status:** ✅ DONE
 
 #### Configuration
 
@@ -729,17 +742,18 @@ python -m heph --target https://example.com --use-ai --ai-tone both
 
 **Benefits:**
 
--   Cost transparency
--   Budget enforcement
--   Enterprise compliance
--   Monthly projections
+- Cost transparency
+- Budget enforcement
+- Enterprise compliance
+- Monthly projections
 
 ---
 
-### 🌊 AI Streaming Responses
+### ✅ 🌊 AI Streaming Responses
 
-**Ticket:** IMPROV-007  
+**Ticket:** IMPROV-007
 **Priority:** Low
+**Status:** ✅ DONE
 
 #### Current Behavior
 
@@ -765,45 +779,42 @@ python -m heph --target https://example.com --use-ai --ai-tone both
 
 **Benefits:**
 
--   Improved UX (see progress)
--   Reduced perceived latency
--   Critical for Ollama (28 min → see output)
--   Immediate error detection
+- Improved UX (see progress)
+- Reduced perceived latency
+- Critical for Ollama (28 min → see output)
+- Immediate error detection
 
 ---
 
 ### 📚 Additional v0.2.0 Features
 
-#### CVE Database Integration
+#### ✅ CVE Database Integration
 
--   CVE lookup for detected server versions
--   Apache/Nginx CVE correlation
--   Exploit availability checking
--   CVSS scoring for vulnerabilities
+- Live NVD API v2 lookup for detected server/component versions
+- Apache, Nginx, PHP, OpenSSL CVE correlation
+- CIRCL.lu fallback when NVD rate-limits
+- CVSS scoring enriched per finding (`cvss` field + `vulnerabilities` array)
+- CPE vendor normalization (f5/nginx, oracle/mysql, redis/redis)
 
-#### PHP.ini Auditing
+#### ✅ Port Scanner (NEW — not in original roadmap)
 
--   Detect dangerous PHP settings:
-    -   `allow_url_fopen` (SSRF risk)
-    -   `display_errors` (information disclosure)
-    -   `expose_php` (version disclosure)
-    -   `disable_functions` (command execution)
+- 37 common ports with banner grabbing
+- Web framework detection on open ports
+- CVE enrichment for detected services
 
-#### PDF Export
+#### ✅ Multi-Component Server Header Parsing (NEW)
 
--   Customizable PDF reports with branding
--   Executive-friendly formatting
--   Charts and graphs for trends
--   Professional deliverable for clients
+- PHP version + OpenSSL version extracted from Apache `Server:` header
+- Separate findings HEPH-SRV-016 / HEPH-SRV-017 with CVE enrichment
 
 **Breaking Changes:** None (fully backward compatible)
 
 ---
 
-## v0.3.0 - Enterprise & Interactive Features
+## v0.3.0 — Enterprise & Interactive Features
 
-**Theme:** Scale, Automation, Conversational AI  
-**Target Release:** Q3 2026 (July-August)  
+**Theme:** Scale, Automation, Conversational AI
+**Target Release:** Q3 2026 (July-August)
 **Focus:** Enterprise needs, multi-site scanning, interactive AI
 
 ---
@@ -854,10 +865,10 @@ $ heph --load-profile privacy-mode
 
 **Benefits:**
 
--   No YAML editing required
--   Real-time validation
--   Reusable profiles
--   Team collaboration
+- No YAML editing required
+- Real-time validation
+- Reusable profiles
+- Team collaboration
 
 ---
 
@@ -909,10 +920,10 @@ Database Size:     671 KB
 
 **Benefits:**
 
--   No SQL knowledge required
--   Rapid auditing
--   Automation-friendly
--   Data integrity checks
+- No SQL knowledge required
+- Rapid auditing
+- Automation-friendly
+- Data integrity checks
 
 ---
 
@@ -962,11 +973,11 @@ AI: Searching CVE database... Found 3 vulnerabilities:
 
 **Features:**
 
--   Natural language queries
--   Multi-turn dialogue with context
--   Scan comparison and diff analysis
--   CVE/ExploitDB integration
--   Step-by-step remediation guidance
+- Natural language queries
+- Multi-turn dialogue with context
+- Scan comparison and diff analysis
+- CVE/ExploitDB integration
+- Step-by-step remediation guidance
 
 ---
 
@@ -988,11 +999,11 @@ https://beta.example.org
 # Batch scan
 $ heph --targets-file targets.txt --html
 [1/4] Scanning https://example.com...
-  ✓ Complete (21 findings in 23s)
+  ✓ Complete (38 findings in 30s)
 [2/4] Scanning https://staging.example.com...
-  ✓ Complete (18 findings in 19s)
+  ✓ Complete (24 findings in 28s)
 [3/4] Scanning http://localhost:8080...
-  ✓ Complete (21 findings in 21s)
+  ✓ Complete (42 findings in 29s)
 [4/4] Scanning https://beta.example.org...
   ⚠️  Failed (Connection refused)
 
@@ -1000,8 +1011,8 @@ Summary Report:
   Total Scans:    4
   Successful:     3
   Failed:         1
-  Total Findings: 60
-  Avg Duration:   21s
+  Total Findings: 104
+  Avg Duration:   29s
 ```
 
 #### Aggregate Reporting
@@ -1011,9 +1022,9 @@ Summary Report:
 $ heph db reports aggregate --scans 81,82,83 --output aggregate.html
 
 Aggregate Report (3 sites):
-  example.com:     21 findings
-  staging.example: 18 findings
-  localhost:8080:  21 findings
+  example.com:     38 findings
+  staging.example: 24 findings
+  localhost:8080:  42 findings
 
 Common Issues (found in all 3):
   ❌ Missing HSTS header
@@ -1023,10 +1034,10 @@ Common Issues (found in all 3):
 
 **Benefits:**
 
--   Network-wide visibility
--   Common vulnerability identification
--   Parallel scanning
--   Centralized reporting
+- Network-wide visibility
+- Common vulnerability identification
+- Parallel scanning
+- Centralized reporting
 
 ---
 
@@ -1131,10 +1142,10 @@ pipeline {
 
 **Benefits:**
 
--   Shift-left security (catch issues in CI)
--   Automated compliance checking
--   Historical tracking via artifacts
--   Block deployments on critical findings
+- Shift-left security (catch issues in CI)
+- Automated compliance checking
+- Historical tracking via artifacts
+- Block deployments on critical findings
 
 ---
 
@@ -1197,37 +1208,44 @@ POST /api/v1/webhooks
 
 **Features:**
 
--   Async scan triggering
--   Real-time progress updates
--   Webhook notifications
--   Multi-user authentication (JWT)
--   Rate limiting per API key
--   OpenAPI/Swagger docs
+- Async scan triggering
+- Real-time progress updates
+- Webhook notifications
+- Multi-user authentication (JWT)
+- Rate limiting per API key
+- OpenAPI/Swagger docs
 
 **Benefits:**
 
--   Integration with SIEM/SOAR platforms
--   Automated scanning workflows
--   Custom dashboards
--   Programmatic access
+- Integration with SIEM/SOAR platforms
+- Automated scanning workflows
+- Custom dashboards
+- Programmatic access
 
 ---
 
 ### 📚 Additional v0.3.0 Features
 
+#### PDF Export (moved from v0.2.0)
+
+- Customizable PDF reports with branding
+- Executive-friendly formatting
+- Charts and graphs for trends
+- Professional deliverable for clients
+
 #### Nmap Integration
 
--   Port scanning before server checks
--   Service version detection
--   OS fingerprinting
--   Combined vulnerability assessment
+- Port scanning before server checks
+- Service version detection
+- OS fingerprinting
+- Combined vulnerability assessment
 
 #### Advanced Crawling
 
--   Spider mode with configurable depth
--   JavaScript rendering (Playwright)
--   Form discovery
--   API endpoint enumeration
+- Spider mode with configurable depth
+- JavaScript rendering (Playwright)
+- Form discovery
+- API endpoint enumeration
 
 **Breaking Changes:** Database schema v2 (auto-migration provided)
 
@@ -1243,32 +1261,32 @@ POST /api/v1/webhooks
 
 #### Automated Remediation
 
--   Ansible playbook generation for fixes
--   Safe auto-patching with approval workflow
--   Rollback capability
--   Dry-run mode (simulate without applying)
--   Chef/Puppet integration
+- Ansible playbook generation for fixes
+- Safe auto-patching with approval workflow
+- Rollback capability
+- Dry-run mode (simulate without applying)
+- Chef/Puppet integration
 
 #### ML-Based Detection
 
--   Anomaly detection (unusual server configurations)
--   False positive reduction (learn from user feedback)
--   Behavioral analysis (detect suspicious patterns)
--   Custom model training on historical data
+- Anomaly detection (unusual server configurations)
+- False positive reduction (learn from user feedback)
+- Behavioral analysis (detect suspicious patterns)
+- Custom model training on historical data
 
 #### Advanced AI Capabilities
 
--   Agent autonomy (AI plans scan strategies)
--   Exploit generation (PoC code for findings)
--   Custom remediation scripts (AI-generated bash/PowerShell)
--   Natural language queries ("What's most urgent?")
+- Agent autonomy (AI plans scan strategies)
+- Exploit generation (PoC code for findings)
+- Custom remediation scripts (AI-generated bash/PowerShell)
+- Natural language queries ("What's most urgent?")
 
 #### Performance Enhancements
 
--   Distributed scanning (worker nodes)
--   Redis cache for common checks
--   Optimized request batching
--   GPU acceleration for ML models
+- Distributed scanning (worker nodes)
+- Redis cache for common checks
+- Optimized request batching
+- GPU acceleration for ML models
 
 **Breaking Changes:** Configuration schema v2 (backward compatible)
 
@@ -1304,9 +1322,9 @@ Hephaestus development follows these principles:
 
 ### Commitments
 
--   ✅ **Quarterly feature releases** with new capabilities
--   ✅ **Open development** with public roadmap
--   ✅ **Responsive support** on GitHub (48h response)
+- ✅ **Quarterly feature releases** with new capabilities
+- ✅ **Open development** with public roadmap
+- ✅ **Responsive support** on GitHub (48h response)
 
 ---
 
@@ -1321,5 +1339,5 @@ See CONTRIBUTING.md for developer guidelines
 **Need a feature urgently?**  
 Consider Pro Track or sponsor the project
 
-_Last updated: November 22, 2025_  
-_Roadmap version: 1.0 (v0.1.0)_
+_Last updated: May 2026_
+_Roadmap version: 2.0 (v0.2.0)_
